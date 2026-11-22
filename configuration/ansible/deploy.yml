@@ -24,16 +24,16 @@
     komodo_mongo_version: "8.0"
     # Por onde os agentes chegam no Core (Caddy da Oracle, só VPN). A Oracle usa o container direto (vars.yml).
     komodo_core_address: "wss://komodo.vinicius-gpl.com"
+    # Swarm overlay network where Caddy reaches the Komodo stacks
+    swarm_edge_network: "edge"
     netbird_proxy_token: ""
     netbird_proxy_domain: ""
     netbird_proxy_address: ""
     # Caddy: sobrescreva por servidor em configuration/servers/<servidor>/vars.yml
     caddy_sites:
-      - portainer/config/portainer.caddy
       - wireguard/config/wireguard.caddy
       - cockpit/cockpit.caddy
       - netbird/config/netbird.caddy
-      - beszel/config/beszel.caddy
     caddy_tunnels: []
     vpn_cidr: "100.64.0.0/10"
 
@@ -46,6 +46,14 @@
       tags: [base, proxy, always]
 
     # -------------------------------------------------------------------------
+    # Swarm: one single-node Swarm per server (swarm_enabled in servers/<name>/vars.yml)
+    # -------------------------------------------------------------------------
+    - name: "[swarm] Docker Swarm e rede edge"
+      include_tasks: "{{ apps_dir }}/swarm/ansible/deploy.yml"
+      when: (swarm_enabled | default(false) | bool) or ('swarm' in ansible_run_tags)
+      tags: [swarm]
+
+    # -------------------------------------------------------------------------
     # Apps e Serviços
     # -------------------------------------------------------------------------
     - name: "[wireguard] Deploy WireGuard (wg-easy)"
@@ -56,12 +64,16 @@
       include_tasks: "{{ apps_dir }}/caddy/ansible/deploy.yml"
       tags: [caddy]
 
+    # Portainer and Beszel stay in the repo but are off by default (Komodo replaced them):
+    # they only run when called by tag or with <app>_enabled=true.
     - name: "[portainer] Deploy Portainer Server"
       include_tasks: "{{ apps_dir }}/portainer/ansible/deploy.yml"
+      when: (portainer_enabled | default(false) | bool) or ('portainer' in ansible_run_tags)
       tags: [portainer]
 
     - name: "[portainer-agent] Deploy Portainer Agent / Edge"
       include_tasks: "{{ apps_dir }}/portainer/ansible/deploy.agent.yml"
+      when: (portainer_agent_enabled | default(false) | bool) or ('portainer-agent' in ansible_run_tags) or ('portainer_agent' in ansible_run_tags)
       tags: [portainer-agent, portainer_agent]
 
     - name: "[coolify] Deploy Coolify PaaS"
@@ -74,10 +86,12 @@
 
     - name: "[beszel] Deploy Beszel Agent"
       include_tasks: "{{ apps_dir }}/beszel/ansible/deploy.agent.yml"
+      when: (beszel_agent_enabled | default(false) | bool) or ('beszel' in ansible_run_tags) or ('beszel-agent' in ansible_run_tags) or ('beszel_agent' in ansible_run_tags)
       tags: [beszel, beszel-agent, beszel_agent]
 
     - name: "[beszel-hub] Deploy Beszel Hub"
       include_tasks: "{{ apps_dir }}/beszel/ansible/deploy.hub.yml"
+      when: (beszel_hub_enabled | default(false) | bool) or ('beszel-hub' in ansible_run_tags) or ('beszel_hub' in ansible_run_tags)
       tags: [beszel-hub, beszel_hub]
 
     - name: "[netbird] Deploy NetBird Server"

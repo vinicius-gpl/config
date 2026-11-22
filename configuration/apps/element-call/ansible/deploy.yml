@@ -82,23 +82,6 @@
     mode: '0600'
   tags: [element-call, element_call]
 
-- name: "[element-call] Copiar docker-compose do Element Call"
-  copy:
-    src: "{{ apps_dir }}/element-call/compose.yml"
-    dest: "{{ element_call_path }}/docker-compose.yml"
-    mode: '0644'
-  tags: [element-call, element_call]
-
-- name: "[element-call] Criar arquivo .env do Element Call"
-  copy:
-    dest: "{{ element_call_path }}/.env"
-    content: |
-      DOMAIN={{ domain | default(ansible_host) }}
-      LIVEKIT_KEY={{ ec_livekit_key }}
-      LIVEKIT_SECRET={{ ec_livekit_secret }}
-    mode: '0600'
-  tags: [element-call, element_call]
-
 - name: "[element-call] Abrir portas WebRTC do LiveKit no firewall (7881/tcp e 50100-50200/udp)"
   firewalld:
     port: "{{ item }}"
@@ -127,10 +110,19 @@
   failed_when: false
   tags: [element-call, element_call]
 
-- name: "[element-call] Subir containers do Element Call"
-  command: docker compose up -d --force-recreate
-  args:
-    chdir: "{{ element_call_path }}"
+# The containers are Komodo Deployments (.komodo/komodo.toml). Ansible only renders the configs
+# they mount; the admin user is created once Komodo has started Synapse.
+- name: "[element-call] Conferir se o Synapse já está rodando (Komodo)"
+  command: docker inspect --format '{{ "{{" }}.State.Running{{ "}}" }}' element-synapse
+  register: synapse_running
+  failed_when: false
+  changed_when: false
+  check_mode: false
+  tags: [element-call, element_call]
+
+- name: "[element-call] Reiniciar containers para lerem as configs novas"
+  command: docker restart element-synapse element-livekit element-lk-jwt element-call
+  when: synapse_running.stdout == 'true' and not ansible_check_mode
   tags: [element-call, element_call]
 
 - name: "[element-call] Aguardar Synapse responder na porta 8008"
@@ -142,7 +134,7 @@
   delay: 2
   until: synapse_ready.rc == 0
   changed_when: false
-  when: not ansible_check_mode
+  when: synapse_running.stdout == 'true' and not ansible_check_mode
   tags: [element-call, element_call]
 
 - name: "[element-call] Criar usuário inicial no Synapse ({{ ec_admin_user }})"
@@ -158,7 +150,7 @@
     - ec_register_user.rc != 0
     - "'User ID already taken' not in (ec_register_user.stdout + ec_register_user.stderr)"
   changed_when: "'New user localpart' in ec_register_user.stdout or ec_register_user.rc == 0"
-  when: not ansible_check_mode
+  when: synapse_running.stdout == 'true' and not ansible_check_mode
   tags: [element-call, element_call]
 
 - name: "[element-call] Recarregar Caddy para aplicar call.{{ domain | default('') }}"

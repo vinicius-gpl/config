@@ -1,0 +1,38 @@
+---
+# =========================================================================
+# === DOCKER SWARM (ONE NODE PER SERVER) + EDGE NETWORK ===
+# =========================================================================
+# Each server is its own Swarm with a single manager: oracle and acerola never join each other.
+# Apps run as Komodo stacks on that Swarm, and Caddy (a plain container) reaches them through
+# the attachable overlay network `edge`.
+
+- name: "[swarm] Ler estado do Swarm"
+  command: docker info --format '{{ "{{" }}.Swarm.LocalNodeState{{ "}}" }}'
+  register: swarm_state
+  changed_when: false
+  check_mode: false
+  tags: [swarm]
+
+- name: "[swarm] Iniciar o Swarm (manager único)"
+  command: docker swarm init --advertise-addr {{ swarm_advertise_addr | default(ansible_default_ipv4.address) }}
+  when: swarm_state.stdout != 'active'
+  tags: [swarm]
+
+- name: "[swarm] Criar a rede overlay {{ swarm_edge_network }} (attachable)"
+  command: docker network create --driver overlay --attachable {{ swarm_edge_network }}
+  register: swarm_edge
+  failed_when:
+    - swarm_edge.rc != 0
+    - '"already exists" not in swarm_edge.stderr'
+  changed_when: swarm_edge.rc == 0
+  tags: [swarm]
+
+- name: "[swarm] Conectar o Caddy à rede {{ swarm_edge_network }} (se o Caddy existir)"
+  command: docker network connect {{ swarm_edge_network }} caddy
+  register: swarm_caddy_edge
+  failed_when:
+    - swarm_caddy_edge.rc != 0
+    - '"already exists" not in swarm_caddy_edge.stderr'
+    - '"No such container" not in swarm_caddy_edge.stderr'
+  changed_when: swarm_caddy_edge.rc == 0
+  tags: [swarm]

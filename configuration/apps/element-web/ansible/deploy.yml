@@ -20,21 +20,6 @@
     mode: '0644'
   tags: [element-web, element_web]
 
-- name: "[element-web] Copiar docker-compose do Element Web"
-  copy:
-    src: "{{ apps_dir }}/element-web/compose.yml"
-    dest: "{{ element_web_path | default('/opt/element-web') }}/docker-compose.yml"
-    mode: '0644'
-  tags: [element-web, element_web]
-
-- name: "[element-web] Criar arquivo .env do Element Web"
-  copy:
-    dest: "{{ element_web_path | default('/opt/element-web') }}/.env"
-    content: |
-      DOMAIN={{ domain | default(ansible_host) }}
-    mode: '0600'
-  tags: [element-web, element_web]
-
 - name: "[element-web] Garantir que diretório conf.d do Caddy existe"
   file:
     path: "{{ caddy_path }}/conf.d"
@@ -51,10 +36,14 @@
   failed_when: false
   tags: [element-web, element_web]
 
-- name: "[element-web] Subir container do Element Web"
-  command: docker compose up -d --force-recreate
-  args:
-    chdir: "{{ element_web_path | default('/opt/element-web') }}"
+# The container is a Komodo Deployment (.komodo/komodo.toml); Ansible only renders the config it mounts.
+- name: "[element-web] Reiniciar o container para ler a config nova (se o Komodo já subiu)"
+  command: docker restart element-web
+  register: element_web_restart
+  failed_when:
+    - element_web_restart.rc != 0
+    - '"No such container" not in element_web_restart.stderr'
+  when: not ansible_check_mode
   tags: [element-web, element_web]
 
 - name: "[element-web] Recarregar Caddy para aplicar chat.{{ domain | default('') }}"

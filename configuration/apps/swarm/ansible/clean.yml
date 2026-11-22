@@ -1,0 +1,14 @@
+---
+# =========================================================================
+# === DOCKER SWARM CLEAN / TEARDOWN ===
+# =========================================================================
+# Leaves the Swarm: removes every stack and service on this server.
+
+- name: "[swarm] Sair do Swarm (remove stacks e serviços)"
+  command: docker swarm leave --force
+  register: swarm_leave
+  failed_when:
+    - swarm_leave.rc != 0
+    - '"not part of a swarm" not in swarm_leave.stderr'
+  changed_when: swarm_leave.rc == 0
+  tags: [swarm]

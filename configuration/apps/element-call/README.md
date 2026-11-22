@@ -4,7 +4,11 @@ O **Element Call** é a plataforma de videoconferência com criptografia ponta-a
 
 ---
 
-## 🏛️ Por que existem 4 containers no `compose.yml`?
+> **Deploy:** os 4 containers são Deployments do Komodo (`.komodo/komodo.toml` na raiz do repo). O Ansible
+> (etapa `element-call`) só gera as configs em `/opt/element-call/config`, o site do Caddy e as regras de
+> firewall, e cria o usuário admin depois que o Komodo sobe o Synapse.
+
+## 🏛️ Por que existem 4 containers?
 
 O repositório `element-hq/element-call` é apenas o **frontend web (React SPA)** da ferramenta de chamadas da Element. Nas versões atuais (branch padrão `livekit`), a própria Element substituiu o modo antigo P2P (*full-mesh*) pelo **MatrixRTC + LiveKit** para suportar chamadas em grupo sem travar.
 
