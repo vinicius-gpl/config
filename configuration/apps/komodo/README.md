@@ -38,6 +38,9 @@ As versões ficam no `vars:` do `deploy.yml` (`komodo_version`, `komodo_mongo_ve
 | Variável | Onde | Para quê |
 |---|---|---|
 | `komodo_admin_password` | oracle | senha do `admin` (só vale na primeira subida) |
+| `komodo_db_password` | oracle | senha do Mongo (só vale na criação do volume; sem ela, é sorteada) |
+| `komodo_jwt_secret` | oracle | assinatura das sessões do painel (sem ela, é sorteada) |
+| `komodo_webhook_secret` | oracle | segredo dos webhooks do GitHub (o mesmo vai no webhook do repo) |
 | `komodo_onboarding_key` | todo servidor com agente | registra o agente no painel (criada no painel) |
 | `komodo_server_name` | opcional | nome no painel; padrão é o hostname (a Oracle usa `oracle`) |
 
@@ -72,6 +75,49 @@ docker compose -f compose.periphery.yml up -d
 
 Cada agente aparece em **Servers**. Depois do primeiro registro a onboarding key não é mais necessária.
 
+Os segredos vão para `/opt/komodo/secrets.env` só na primeira subida (o arquivo nunca é
+sobrescrito). Para trocar um deles depois, apague o arquivo e rode a etapa de novo. A senha do Mongo
+não pode mudar depois que o volume já existe.
+
+## Swarm, builders e apps
+
+**Regra: todo app builda no servidor onde roda. Não existe registry (sem GHCR, sem push, sem pull).**
+O Builder `oracle` constrói os apps da Oracle e o Builder `acerola` os do acerola. A imagem fica só
+local (`<app>:<commit>`) e a stack sobe com `--resolve-image never`.
+
+O my-config só conhece a infraestrutura. Ela está em [`.komodo/komodo.toml`](../../../.komodo/komodo.toml),
+na raiz do repo:
+
+| Recurso | O quê |
+|---|---|
+| Sync `my-config` | aplica o próprio arquivo (webhook no push da `master`) |
+| Swarm `oracle`, `acerola` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
+| Builder `oracle`, `acerola` | cada servidor constrói as próprias imagens |
+| Deployments `element-*` | Element Call e Web. O Ansible gera as configs, o Komodo roda os containers |
+
+O Caddy é um container comum: ele alcança as stacks pela rede overlay `edge` (attachable), que o
+Ansible cria e na qual conecta o Caddy.
+
+**Cada app** tem o próprio `.komodo/komodo.toml` no repo dele, com Repo, Build, Stack, Procedure,
+Action (rollback) e Sync. Ele aponta para `swarm = "<servidor>"`, `builder = "<servidor>"` e a rede
+`edge`. A rota do app no Caddy é gravada pelo próprio deploy (`post_deploy` da Stack). O my-config
+não sabe nada dos apps.
+
+- **Nomes**: `<servidor>_<app>` (ex.: `acerola_relay`, `oracle_erp-personal`).
+- **Tags**: `context:infra` ou `context:apps`, `env:<servidor>`, `app:<nome>`.
+- **Webhooks no GitHub de cada app**: só dois. O da Sync
+  (`https://komodo.vinicius-gpl.com/listener/github/sync/<sync>/sync`) e o da Procedure
+  (`https://komodo.vinicius-gpl.com/listener/github/procedure/<servidor>_<app>/main`). Use JSON,
+  evento *push* e o `komodo_webhook_secret` como segredo. Build e Stack não têm webhook: é a
+  Procedure que chama os dois.
+- **Segredos dos apps**: Variables secretas do Komodo, usadas como `[[NOME]]`.
+
+**Primeira vez**: crie à mão a Sync `my-config` (repo `vinicius-gpl/my-config`, branch `master`,
+resource path `.komodo/komodo.toml`) e execute. Depois crie as Variables secretas
+`ELEMENT_LIVEKIT_KEY` e `ELEMENT_LIVEKIT_SECRET` com os valores de `/opt/element-call/secrets.yml`
+da Oracle (ou fixe os dois no `hosts.ini` com `element_call_livekit_key`/`element_call_livekit_secret`).
+Os Deployments do Element têm os mesmos nomes dos containers atuais: o Komodo substitui cada um no
+primeiro deploy. Rode a etapa `element-call` do Ansible depois, para criar o usuário admin.
 ## Replicar o Komodo (o mesmo setup em outro lugar)
 
 - **Outro servidor como painel**: rode a etapa `komodo` nele (com `komodo_admin_password` e o

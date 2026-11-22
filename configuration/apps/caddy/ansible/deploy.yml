@@ -103,3 +103,14 @@
   args:
     chdir: "{{ caddy_path }}"
   tags: [caddy]
+
+# Recreating the container drops it from the Swarm edge network, where the Komodo apps live.
+- name: "[caddy] Reconectar o Caddy à rede {{ swarm_edge_network }} (servidores com Swarm)"
+  command: docker network connect {{ swarm_edge_network }} caddy
+  register: caddy_edge
+  failed_when:
+    - caddy_edge.rc != 0
+    - '"already exists" not in caddy_edge.stderr'
+  changed_when: caddy_edge.rc == 0
+  when: swarm_enabled | default(false) | bool
+  tags: [caddy]
