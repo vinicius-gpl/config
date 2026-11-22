@@ -93,7 +93,7 @@ na raiz do repo:
 | Sync `my-config` | aplica o próprio arquivo (webhook no push da `master`) |
 | Swarm `oracle`, `acerola` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
 | Builder `oracle`, `acerola` | cada servidor constrói as próprias imagens |
-| Deployments `element-*` | Element Call e Web. O Ansible gera as configs, o Komodo roda os containers |
+| Deployments `netbird-*`, `element-*` | NetBird, Element Call e Web. O Ansible gera configs e segredos, o Komodo roda os containers |
 
 O Caddy é um container comum: ele alcança as stacks pela rede overlay `edge` (attachable), que o
 Ansible cria e na qual conecta o Caddy.
@@ -104,7 +104,7 @@ Action (rollback) e Sync. Ele aponta para `swarm = "<servidor>"`, `builder = "<s
 não sabe nada dos apps.
 
 - **Nomes**: `<servidor>_<app>` (ex.: `acerola_relay`, `oracle_erp-personal`).
-- **Tags**: `context:infra` ou `context:apps`, `env:<servidor>`, `app:<nome>`.
+- **Tags**: `env:<servidor>` e `app:<nome>` em todo recurso.
 - **Webhooks no GitHub de cada app**: só dois. O da Sync
   (`https://komodo.vinicius-gpl.com/listener/github/sync/<sync>/sync`) e o da Procedure
   (`https://komodo.vinicius-gpl.com/listener/github/procedure/<servidor>_<app>/main`). Use JSON,
