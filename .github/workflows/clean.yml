@@ -37,6 +37,7 @@ on:
           - monitoring
           - komodo
           - komodo-periphery
+          - swarm
           - prune
       remove_volumes:
         description: 'Apagar volumes de dados persistentes?'

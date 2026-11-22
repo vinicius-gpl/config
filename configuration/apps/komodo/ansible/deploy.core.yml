@@ -27,9 +27,10 @@
     mode: '0644'
   tags: [komodo]
 
-- name: "[komodo] Sortear senha do banco"
+# Pinned in a fact because secrets.env.j2 uses the same password twice (Core and Mongo).
+- name: "[komodo] Definir senha do banco (hosts.ini ou sorteada)"
   set_fact:
-    komodo_db_password: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=32') }}"
+    komodo_db_password: "{{ komodo_db_password | default(lookup('password', '/dev/null chars=ascii_letters,digits length=32'), true) }}"
   no_log: true
   tags: [komodo]
 

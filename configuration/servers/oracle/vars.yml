@@ -13,8 +13,6 @@ vpn_routed_public_ip: "168.138.133.78"
 caddy_sites:
   - netbird/config/netbird.caddy            # netbird.<domain>   público
   - element-call/config/element-call.caddy  # call.<domain>      público (login por credencial)
-  - portainer/config/portainer.caddy        # container.<domain> só VPN
-  - beszel/config/beszel.caddy              # monitor.<domain>   só VPN
   - cockpit/cockpit.caddy                   # cockpit.<domain>   só VPN
   - komodo/config/komodo.caddy              # komodo.<domain>    só VPN (/listener/* público)
 
@@ -34,3 +32,6 @@ caddy_tunnels:
 # Komodo: o painel (Core) roda aqui; o agente deste servidor fala com o container direto.
 komodo_core_address: "ws://komodo-core:9120"
 komodo_server_name: oracle
+
+# Single-node Swarm: Komodo runs the app stacks here (apps/swarm).
+swarm_enabled: true
