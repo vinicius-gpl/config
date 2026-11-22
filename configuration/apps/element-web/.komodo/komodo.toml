@@ -1,0 +1,20 @@
+# Komodo resources of element-web (my-config). Applied by the "element-web" Resource Sync declared in
+# .komodo/komodo.toml at the repo root. Tags: env:oracle and app:element-web.
+
+# ── Element Web (oracle) ────────────────────────────────────────────────────────────────────
+
+[[deployment]]
+name = "element-web"
+description = "Cliente web Matrix (chat.vinicius-gpl.com), ligado ao Synapse do Element Call"
+tags = ["env:oracle", "app:element-web"]
+deploy = true
+after = ["element-synapse"]
+[deployment.config]
+server = "oracle"
+image.type = "Image"
+image.params.image = "vectorim/element-web:v1.12.32"
+network = "proxy"
+restart = "unless-stopped"
+volumes = "/opt/element-web/config/config.json:/app/config.json:ro,z"
+extra_args = ["--log-opt=max-size=50m", "--log-opt=max-file=2"]
+links = ["https://chat.vinicius-gpl.com"]
