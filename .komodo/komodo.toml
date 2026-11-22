@@ -1,12 +1,13 @@
 # Komodo resources owned by my-config: the infrastructure of each server and nothing about the apps.
 #
-#   Sync        my-config applies this file (webhook on push to master).
+#   Sync        "my-config" applies this file; one more Sync per app (netbird, element-call,
+#               element-web) applies configuration/apps/<app>/.komodo/komodo.toml.
 #   Swarm       one single-node Swarm per server (oracle, acerola); they never join each other.
 #   Builder     one per server. EVERY APP BUILDS ON THE SERVER IT RUNS ON: oracle builds the oracle
 #               apps, acerola builds the acerola apps. NO REGISTRY: no GHCR, no push, no pull.
 #               Images stay local (<app>:<commit>) and stacks deploy them with --resolve-image never.
-#   Deployment  my-config's own containers (NetBird, Element Call + Web). Ansible renders the
-#               configs and secrets they mount from /opt/<app>; Komodo runs the containers.
+#   Deployment  my-config's own containers, in each app's .komodo/komodo.toml. Ansible renders
+#               the configs and secrets they mount from /opt/<app>; Komodo runs them.
 #
 # Each app repo owns its .komodo/komodo.toml (Repo, Build, Stack, Procedure, Action, Sync) and
 # points to the names below: swarm "<server>", builder "<server>", network "edge".
@@ -21,6 +22,41 @@ git_provider = "github.com"
 repo = "vinicius-gpl/my-config"
 branch = "master"
 resource_path = [".komodo/komodo.toml"]
+delete = false
+
+# ── One Resource Sync per my-config app (each app keeps its own .komodo/komodo.toml) ─────
+
+[[resource_sync]]
+name = "netbird"
+description = "Aplica os recursos do NetBird (servidor e painel) na Oracle"
+tags = ["env:oracle", "app:netbird"]
+[resource_sync.config]
+git_provider = "github.com"
+repo = "vinicius-gpl/my-config"
+branch = "master"
+resource_path = ["configuration/apps/netbird/.komodo/komodo.toml"]
+delete = false
+
+[[resource_sync]]
+name = "element-call"
+description = "Aplica os recursos do Element Call (Synapse, LiveKit, lk-jwt e frontend) na Oracle"
+tags = ["env:oracle", "app:element-call"]
+[resource_sync.config]
+git_provider = "github.com"
+repo = "vinicius-gpl/my-config"
+branch = "master"
+resource_path = ["configuration/apps/element-call/.komodo/komodo.toml"]
+delete = false
+
+[[resource_sync]]
+name = "element-web"
+description = "Aplica os recursos do Element Web na Oracle"
+tags = ["env:oracle", "app:element-web"]
+[resource_sync.config]
+git_provider = "github.com"
+repo = "vinicius-gpl/my-config"
+branch = "master"
+resource_path = ["configuration/apps/element-web/.komodo/komodo.toml"]
 delete = false
 
 # ── Swarms ──────────────────────────────────────────────────────────────────────────────────
@@ -56,161 +92,3 @@ tags = ["env:acerola", "app:builder"]
 [builder.config]
 type = "Server"
 params.servers = ["acerola"]
-
-# ── NetBird (oracle) ────────────────────────────────────────────────────────────────────────
-# The VPN that gives access to this panel: a broken deploy here takes the VPN down, and the fix
-# is then over SSH. Ansible renders /opt/netbird/config.yaml (secrets) and the Caddy site.
-
-[[deployment]]
-name = "netbird-server"
-description = "Servidor NetBird (management, signal, relay e STUN)"
-tags = ["env:oracle", "app:netbird"]
-deploy = true
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "netbirdio/netbird-server:0.80.0"
-network = "proxy"
-restart = "unless-stopped"
-command = "--config /etc/netbird/config.yaml"
-ports = "3478:3478/udp"
-volumes = """
-/opt/netbird/config.yaml:/etc/netbird/config.yaml
-/opt/netbird/data:/var/lib/netbird
-"""
-environment = "NETBIRD_CONFIG=/etc/netbird/config.yaml"
-extra_args = ["--log-opt=max-size=100m", "--log-opt=max-file=2"]
-links = ["https://netbird.vinicius-gpl.com"]
-
-[[deployment]]
-name = "netbird-dashboard"
-description = "Painel web do NetBird (netbird.vinicius-gpl.com)"
-tags = ["env:oracle", "app:netbird"]
-deploy = true
-after = ["netbird-server"]
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "netbirdio/dashboard:v2.94.0"
-network = "proxy"
-restart = "unless-stopped"
-environment = """
-NETBIRD_MGMT_API_ENDPOINT=https://netbird.vinicius-gpl.com
-NETBIRD_MGMT_GRPC_API_ENDPOINT=https://netbird.vinicius-gpl.com
-AUTH_AUDIENCE=netbird-dashboard
-AUTH_CLIENT_ID=netbird-dashboard
-AUTH_CLIENT_SECRET=
-AUTH_AUTHORITY=https://netbird.vinicius-gpl.com/oauth2
-USE_AUTH0=false
-AUTH_SUPPORTED_SCOPES=openid profile email groups
-AUTH_REDIRECT_URI=/nb-auth
-AUTH_SILENT_REDIRECT_URI=/nb-silent-auth
-NGINX_SSL_PORT=443
-LETSENCRYPT_DOMAIN=none
-"""
-extra_args = ["--log-opt=max-size=100m", "--log-opt=max-file=2"]
-links = ["https://netbird.vinicius-gpl.com"]
-
-# ── Element Call (oracle) ───────────────────────────────────────────────────────────────────
-# Container names are the Caddy upstreams in element-call/config/element-call.caddy.
-# ELEMENT_LIVEKIT_KEY / ELEMENT_LIVEKIT_SECRET (secret Variables) must match the values Ansible
-# keeps in /opt/element-call/secrets.yml, which also go into livekit.yaml.
-
-[[deployment]]
-name = "element-synapse"
-description = "Homeserver Matrix (Synapse) do Element Call"
-tags = ["env:oracle", "app:element-call"]
-deploy = true
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "matrixdotorg/synapse:v1.163.0"
-network = "proxy"
-restart = "unless-stopped"
-volumes = """
-/opt/element-call/config/homeserver.yaml:/etc/synapse/homeserver.yaml:ro,z
-element-synapse-data:/data:z
-"""
-environment = """
-SYNAPSE_CONFIG_PATH=/etc/synapse/homeserver.yaml
-UID=0
-GID=0
-"""
-# Generates the signing key on the first boot, then runs the image's own start script.
-command = "-c 'test -f /data/signing.key || python -m synapse.app.homeserver --config-path /etc/synapse/homeserver.yaml --generate-keys; exec /start.py'"
-extra_args = ["--entrypoint=/bin/sh", "--log-opt=max-size=100m", "--log-opt=max-file=2"]
-
-[[deployment]]
-name = "element-livekit"
-description = "Servidor WebRTC (LiveKit SFU) do Element Call"
-tags = ["env:oracle", "app:element-call"]
-deploy = true
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "livekit/livekit-server:v1.13.10"
-network = "proxy"
-restart = "unless-stopped"
-command = "--config /etc/livekit.yaml"
-ports = """
-7881:7881/tcp
-50100-50200:50100-50200/udp
-"""
-volumes = "/opt/element-call/config/livekit.yaml:/etc/livekit.yaml:ro,z"
-extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
-
-[[deployment]]
-name = "element-lk-jwt"
-description = "Autorização MatrixRTC (lk-jwt-service) do Element Call"
-tags = ["env:oracle", "app:element-call"]
-deploy = true
-after = ["element-synapse", "element-livekit"]
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "ghcr.io/element-hq/lk-jwt-service:0.9.0"
-network = "proxy"
-restart = "unless-stopped"
-environment = """
-LIVEKIT_JWT_BIND=:8080
-LIVEKIT_URL=wss://call.vinicius-gpl.com/livekit/sfu
-LIVEKIT_KEY=[[ELEMENT_LIVEKIT_KEY]]
-LIVEKIT_SECRET=[[ELEMENT_LIVEKIT_SECRET]]
-LIVEKIT_FULL_ACCESS_HOMESERVERS=call.vinicius-gpl.com
-LIVEKIT_CS_API_URL_OVERRIDES=call.vinicius-gpl.com=http://element-synapse:8008
-"""
-extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
-
-[[deployment]]
-name = "element-call"
-description = "Frontend do Element Call (call.vinicius-gpl.com)"
-tags = ["env:oracle", "app:element-call"]
-deploy = true
-after = ["element-synapse", "element-lk-jwt"]
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "ghcr.io/element-hq/element-call:v0.28.0"
-network = "proxy"
-restart = "unless-stopped"
-volumes = "/opt/element-call/config/config.json:/app/config.json:ro,z"
-extra_args = ["--log-opt=max-size=50m", "--log-opt=max-file=2"]
-links = ["https://call.vinicius-gpl.com"]
-
-# ── Element Web (oracle) ────────────────────────────────────────────────────────────────────
-
-[[deployment]]
-name = "element-web"
-description = "Cliente web Matrix (chat.vinicius-gpl.com), ligado ao Synapse do Element Call"
-tags = ["env:oracle", "app:element-web"]
-deploy = true
-after = ["element-synapse"]
-[deployment.config]
-server = "oracle"
-image.type = "Image"
-image.params.image = "vectorim/element-web:v1.12.32"
-network = "proxy"
-restart = "unless-stopped"
-volumes = "/opt/element-web/config/config.json:/app/config.json:ro,z"
-extra_args = ["--log-opt=max-size=50m", "--log-opt=max-file=2"]
-links = ["https://chat.vinicius-gpl.com"]

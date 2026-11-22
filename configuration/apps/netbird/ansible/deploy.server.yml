@@ -26,7 +26,7 @@
     force: false
     content: |
       server:
-        listenAddress: ":80"
+        listenAddress: ":{{ netbird_listen_port | default(8081) }}"
         exposedAddress: "https://netbird.{{ domain | default(ansible_host) }}:443"
         stunPorts:
           - 3478
@@ -54,6 +54,15 @@
           engine: "sqlite"
           encryptionKey: "{{ nb_datastore_key }}"
     mode: '0600'
+  tags: [netbird]
+
+# netbird-server runs on the host network (Komodo Deployment): it can't listen on :80, which is
+# Caddy's. config.yaml is never overwritten, so only the listen port is fixed in place.
+- name: "[netbird] Ajustar a porta do netbird-server no config.yaml (rede host)"
+  replace:
+    path: "{{ netbird_path }}/config.yaml"
+    regexp: '^(\s*listenAddress:\s*)".*"'
+    replace: '\1":{{ netbird_listen_port | default(8081) }}"'
   tags: [netbird]
 
 - name: "[netbird] Abrir porta STUN (3478/udp) no firewall"
