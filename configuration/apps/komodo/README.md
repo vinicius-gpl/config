@@ -90,7 +90,7 @@ na raiz do repo:
 
 | Recurso | O quê |
 |---|---|
-| Sync `my-config` | aplica o próprio arquivo (webhook no push da `master`) |
+| Sync `config` | aplica o próprio arquivo (webhook no push da `main`) |
 | Swarm `oracle`, `acerola` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
 | Builder `oracle`, `acerola` | cada servidor constrói as próprias imagens |
 | Deployments `netbird-*`, `element-*` | NetBird, Element Call e Web. O Ansible gera configs e segredos, o Komodo roda os containers |
@@ -112,7 +112,7 @@ não sabe nada dos apps.
   Procedure que chama os dois.
 - **Segredos dos apps**: Variables secretas do Komodo, usadas como `[[NOME]]`.
 
-**Primeira vez**: crie à mão a Sync `my-config` (repo `vinicius-gpl/my-config`, branch `master`,
+**Primeira vez**: crie à mão a Sync `config` (repo `vinicius-gpl/config`, branch `main`,
 resource path `.komodo/komodo.toml`) e execute. Depois crie as Variables secretas
 `ELEMENT_LIVEKIT_KEY` e `ELEMENT_LIVEKIT_SECRET` com os valores de `/opt/element-call/secrets.yml`
 da Oracle (ou fixe os dois no `hosts.ini` com `element_call_livekit_key`/`element_call_livekit_secret`).

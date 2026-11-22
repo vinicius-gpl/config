@@ -1,12 +1,12 @@
-# Komodo resources owned by my-config: the infrastructure of each server and nothing about the apps.
+# Komodo resources owned by config: the infrastructure of each server and nothing about the apps.
 #
-#   Sync        "my-config" applies this file; one more Sync per app (netbird, element-call,
+#   Sync        "config" applies this file; one more Sync per app (netbird, element-call,
 #               element-web) applies configuration/apps/<app>/.komodo/komodo.toml.
 #   Swarm       one single-node Swarm per server (oracle, acerola); they never join each other.
 #   Builder     one per server. EVERY APP BUILDS ON THE SERVER IT RUNS ON: oracle builds the oracle
 #               apps, acerola builds the acerola apps. NO REGISTRY: no GHCR, no push, no pull.
 #               Images stay local (<app>:<commit>) and stacks deploy them with --resolve-image never.
-#   Deployment  my-config's own containers, in each app's .komodo/komodo.toml. Ansible renders
+#   Deployment  config's own containers, in each app's .komodo/komodo.toml. Ansible renders
 #               the configs and secrets they mount from /opt/<app>; Komodo runs them.
 #
 # Each app repo owns its .komodo/komodo.toml (Repo, Build, Stack, Procedure, Action, Sync) and
@@ -14,17 +14,17 @@
 # Tags: env:<server> and app:<name> on every resource.
 
 [[resource_sync]]
-name = "my-config"
-description = "Aplica o .komodo/komodo.toml do my-config (infra dos servidores)"
-tags = ["app:my-config"]
+name = "config"
+description = "Aplica o .komodo/komodo.toml do config (infra dos servidores)"
+tags = ["app:config"]
 [resource_sync.config]
 git_provider = "github.com"
-repo = "vinicius-gpl/my-config"
-branch = "master"
+repo = "vinicius-gpl/config"
+branch = "main"
 resource_path = [".komodo/komodo.toml"]
 delete = false
 
-# ── One Resource Sync per my-config app (each app keeps its own .komodo/komodo.toml) ─────
+# ── One Resource Sync per config app (each app keeps its own .komodo/komodo.toml) ─────
 
 [[resource_sync]]
 name = "netbird"
@@ -32,8 +32,8 @@ description = "Aplica os recursos do NetBird (servidor e painel) na Oracle"
 tags = ["env:oracle", "app:netbird"]
 [resource_sync.config]
 git_provider = "github.com"
-repo = "vinicius-gpl/my-config"
-branch = "master"
+repo = "vinicius-gpl/config"
+branch = "main"
 resource_path = ["configuration/apps/netbird/.komodo/komodo.toml"]
 delete = false
 
@@ -43,8 +43,8 @@ description = "Aplica os recursos do Element Call (Synapse, LiveKit, lk-jwt e fr
 tags = ["env:oracle", "app:element-call"]
 [resource_sync.config]
 git_provider = "github.com"
-repo = "vinicius-gpl/my-config"
-branch = "master"
+repo = "vinicius-gpl/config"
+branch = "main"
 resource_path = ["configuration/apps/element-call/.komodo/komodo.toml"]
 delete = false
 
@@ -54,8 +54,8 @@ description = "Aplica os recursos do Element Web na Oracle"
 tags = ["env:oracle", "app:element-web"]
 [resource_sync.config]
 git_provider = "github.com"
-repo = "vinicius-gpl/my-config"
-branch = "master"
+repo = "vinicius-gpl/config"
+branch = "main"
 resource_path = ["configuration/apps/element-web/.komodo/komodo.toml"]
 delete = false
 
