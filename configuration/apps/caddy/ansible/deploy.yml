@@ -110,7 +110,7 @@
   register: caddy_edge
   failed_when:
     - caddy_edge.rc != 0
-    - '"already exists" not in caddy_edge.stderr'
+    - '"already" not in caddy_edge.stderr'
   changed_when: caddy_edge.rc == 0
   when: swarm_enabled | default(false) | bool
   tags: [caddy]
