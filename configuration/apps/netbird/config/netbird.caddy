@@ -1,20 +1,21 @@
 netbird.{$DOMAIN} {
     encode zstd gzip
 
-    # Rotas nativas gRPC (Signal e Management)
+    # netbird-server runs on the host network (Komodo Deployment), listening on :8081.
+    # Native gRPC routes (Signal and Management)
     @grpc header Content-Type application/grpc*
-    reverse_proxy @grpc h2c://netbird-server:80
+    reverse_proxy @grpc h2c://host.docker.internal:8081
 
-    # Rotas de WebSocket, API, Relay e Autenticação
+    # WebSocket, API, Relay and Auth routes
     @backend path /relay* /ws-proxy* /api* /oauth2* /signalexchange.SignalExchange/* /management.ManagementService/*
-    reverse_proxy @backend netbird-server:80 {
+    reverse_proxy @backend host.docker.internal:8081 {
         header_up Host {host}
         header_up X-Real-IP {remote}
         header_up X-Forwarded-For {remote}
         header_up X-Forwarded-Proto {scheme}
     }
 
-    # Dashboard Web (todo o restante)
+    # Web dashboard (everything else)
     reverse_proxy netbird-dashboard:80
 
     log {
