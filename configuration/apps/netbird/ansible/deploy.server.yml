@@ -13,37 +13,11 @@
     - "{{ netbird_path }}/data"
   tags: [netbird]
 
-- name: "[netbird] Copiar docker-compose do NetBird"
-  copy:
-    src: "{{ apps_dir }}/netbird/compose.yml"
-    dest: "{{ netbird_path }}/docker-compose.yml"
-    mode: '0644'
-  tags: [netbird]
-
 - name: "[netbird] Gerar segredos criptográficos (se não fornecidos)"
   set_fact:
     nb_auth_secret: "{{ netbird_auth_secret | default(lookup('password', '/dev/null chars=ascii_letters,digits length=32')) }}"
     nb_session_key: "{{ netbird_session_key if (netbird_session_key is defined and (netbird_session_key | length == 44)) else (netbird_session_key | default(lookup('password', '/dev/null chars=ascii_letters,digits length=32')) | b64encode) }}"
     nb_datastore_key: "{{ netbird_datastore_key if (netbird_datastore_key is defined and (netbird_datastore_key | length == 44)) else (netbird_datastore_key | default(lookup('password', '/dev/null chars=ascii_letters,digits length=32')) | b64encode) }}"
-  tags: [netbird]
-
-- name: "[netbird] Criar dashboard.env"
-  copy:
-    dest: "{{ netbird_path }}/dashboard.env"
-    content: |
-      NETBIRD_MGMT_API_ENDPOINT=https://netbird.{{ domain | default(ansible_host) }}
-      NETBIRD_MGMT_GRPC_API_ENDPOINT=https://netbird.{{ domain | default(ansible_host) }}
-      AUTH_AUDIENCE=netbird-dashboard
-      AUTH_CLIENT_ID=netbird-dashboard
-      AUTH_CLIENT_SECRET=
-      AUTH_AUTHORITY=https://netbird.{{ domain | default(ansible_host) }}/oauth2
-      USE_AUTH0=false
-      AUTH_SUPPORTED_SCOPES=openid profile email groups
-      AUTH_REDIRECT_URI=/nb-auth
-      AUTH_SILENT_REDIRECT_URI=/nb-silent-auth
-      NGINX_SSL_PORT=443
-      LETSENCRYPT_DOMAIN=none
-    mode: '0600'
   tags: [netbird]
 
 - name: "[netbird] Criar config.yaml para netbird-server (não sobrescrever se já existir)"
@@ -112,8 +86,5 @@
   failed_when: false
   tags: [netbird]
 
-- name: "[netbird] Subir containers do NetBird"
-  command: docker compose up -d --force-recreate
-  args:
-    chdir: "{{ netbird_path }}"
-  tags: [netbird]
+# netbird-server and netbird-dashboard are Komodo Deployments (.komodo/komodo.toml).
+# Ansible only renders config.yaml (secrets) and opens the STUN port.

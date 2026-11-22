@@ -5,17 +5,17 @@
 #   Builder     one per server. EVERY APP BUILDS ON THE SERVER IT RUNS ON: oracle builds the oracle
 #               apps, acerola builds the acerola apps. NO REGISTRY: no GHCR, no push, no pull.
 #               Images stay local (<app>:<commit>) and stacks deploy them with --resolve-image never.
-#   Deployment  my-config's own containers (Element Call + Web). Ansible renders the configs they
-#               mount from /opt/element-*/config; Komodo runs the containers.
+#   Deployment  my-config's own containers (NetBird, Element Call + Web). Ansible renders the
+#               configs and secrets they mount from /opt/<app>; Komodo runs the containers.
 #
 # Each app repo owns its .komodo/komodo.toml (Repo, Build, Stack, Procedure, Action, Sync) and
 # points to the names below: swarm "<server>", builder "<server>", network "edge".
-# Tags: context:infra|apps, env:<server>, app:<name>.
+# Tags: env:<server> and app:<name> on every resource.
 
 [[resource_sync]]
 name = "my-config"
 description = "Aplica o .komodo/komodo.toml do my-config (infra dos servidores)"
-tags = ["context:infra", "app:my-config"]
+tags = ["app:my-config"]
 [resource_sync.config]
 git_provider = "github.com"
 repo = "vinicius-gpl/my-config"
@@ -28,14 +28,14 @@ delete = false
 [[swarm]]
 name = "oracle"
 description = "Swarm de um nó na Oracle"
-tags = ["context:infra", "env:oracle"]
+tags = ["env:oracle", "app:swarm"]
 [swarm.config]
 servers = ["oracle"]
 
 [[swarm]]
 name = "acerola"
 description = "Swarm de um nó no acerola"
-tags = ["context:infra", "env:acerola"]
+tags = ["env:acerola", "app:swarm"]
 [swarm.config]
 servers = ["acerola"]
 
@@ -44,7 +44,7 @@ servers = ["acerola"]
 [[builder]]
 name = "oracle"
 description = "Constrói as imagens dos apps da Oracle na própria Oracle (sem registry)"
-tags = ["context:infra", "env:oracle"]
+tags = ["env:oracle", "app:builder"]
 [builder.config]
 type = "Server"
 params.servers = ["oracle"]
@@ -52,10 +52,64 @@ params.servers = ["oracle"]
 [[builder]]
 name = "acerola"
 description = "Constrói as imagens dos apps do acerola no próprio acerola (sem registry)"
-tags = ["context:infra", "env:acerola"]
+tags = ["env:acerola", "app:builder"]
 [builder.config]
 type = "Server"
 params.servers = ["acerola"]
+
+# ── NetBird (oracle) ────────────────────────────────────────────────────────────────────────
+# The VPN that gives access to this panel: a broken deploy here takes the VPN down, and the fix
+# is then over SSH. Ansible renders /opt/netbird/config.yaml (secrets) and the Caddy site.
+
+[[deployment]]
+name = "netbird-server"
+description = "Servidor NetBird (management, signal, relay e STUN)"
+tags = ["env:oracle", "app:netbird"]
+deploy = true
+[deployment.config]
+server = "oracle"
+image.type = "Image"
+image.params.image = "netbirdio/netbird-server:0.80.0"
+network = "proxy"
+restart = "unless-stopped"
+command = "--config /etc/netbird/config.yaml"
+ports = "3478:3478/udp"
+volumes = """
+/opt/netbird/config.yaml:/etc/netbird/config.yaml
+/opt/netbird/data:/var/lib/netbird
+"""
+environment = "NETBIRD_CONFIG=/etc/netbird/config.yaml"
+extra_args = ["--log-opt=max-size=100m", "--log-opt=max-file=2"]
+links = ["https://netbird.vinicius-gpl.com"]
+
+[[deployment]]
+name = "netbird-dashboard"
+description = "Painel web do NetBird (netbird.vinicius-gpl.com)"
+tags = ["env:oracle", "app:netbird"]
+deploy = true
+after = ["netbird-server"]
+[deployment.config]
+server = "oracle"
+image.type = "Image"
+image.params.image = "netbirdio/dashboard:v2.94.0"
+network = "proxy"
+restart = "unless-stopped"
+environment = """
+NETBIRD_MGMT_API_ENDPOINT=https://netbird.vinicius-gpl.com
+NETBIRD_MGMT_GRPC_API_ENDPOINT=https://netbird.vinicius-gpl.com
+AUTH_AUDIENCE=netbird-dashboard
+AUTH_CLIENT_ID=netbird-dashboard
+AUTH_CLIENT_SECRET=
+AUTH_AUTHORITY=https://netbird.vinicius-gpl.com/oauth2
+USE_AUTH0=false
+AUTH_SUPPORTED_SCOPES=openid profile email groups
+AUTH_REDIRECT_URI=/nb-auth
+AUTH_SILENT_REDIRECT_URI=/nb-silent-auth
+NGINX_SSL_PORT=443
+LETSENCRYPT_DOMAIN=none
+"""
+extra_args = ["--log-opt=max-size=100m", "--log-opt=max-file=2"]
+links = ["https://netbird.vinicius-gpl.com"]
 
 # ── Element Call (oracle) ───────────────────────────────────────────────────────────────────
 # Container names are the Caddy upstreams in element-call/config/element-call.caddy.
@@ -65,7 +119,7 @@ params.servers = ["acerola"]
 [[deployment]]
 name = "element-synapse"
 description = "Homeserver Matrix (Synapse) do Element Call"
-tags = ["context:infra", "env:oracle", "app:element-call"]
+tags = ["env:oracle", "app:element-call"]
 deploy = true
 [deployment.config]
 server = "oracle"
@@ -89,7 +143,7 @@ extra_args = ["--entrypoint=/bin/sh", "--log-opt=max-size=100m", "--log-opt=max-
 [[deployment]]
 name = "element-livekit"
 description = "Servidor WebRTC (LiveKit SFU) do Element Call"
-tags = ["context:infra", "env:oracle", "app:element-call"]
+tags = ["env:oracle", "app:element-call"]
 deploy = true
 [deployment.config]
 server = "oracle"
@@ -108,7 +162,7 @@ extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--log-opt=max-si
 [[deployment]]
 name = "element-lk-jwt"
 description = "Autorização MatrixRTC (lk-jwt-service) do Element Call"
-tags = ["context:infra", "env:oracle", "app:element-call"]
+tags = ["env:oracle", "app:element-call"]
 deploy = true
 after = ["element-synapse", "element-livekit"]
 [deployment.config]
@@ -130,7 +184,7 @@ extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--log-opt=max-si
 [[deployment]]
 name = "element-call"
 description = "Frontend do Element Call (call.vinicius-gpl.com)"
-tags = ["context:infra", "env:oracle", "app:element-call"]
+tags = ["env:oracle", "app:element-call"]
 deploy = true
 after = ["element-synapse", "element-lk-jwt"]
 [deployment.config]
@@ -148,7 +202,7 @@ links = ["https://call.vinicius-gpl.com"]
 [[deployment]]
 name = "element-web"
 description = "Cliente web Matrix (chat.vinicius-gpl.com), ligado ao Synapse do Element Call"
-tags = ["context:infra", "env:oracle", "app:element-web"]
+tags = ["env:oracle", "app:element-web"]
 deploy = true
 after = ["element-synapse"]
 [deployment.config]

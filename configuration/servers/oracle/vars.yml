@@ -13,7 +13,6 @@ vpn_routed_public_ip: "168.138.133.78"
 caddy_sites:
   - netbird/config/netbird.caddy            # netbird.<domain>   público
   - element-call/config/element-call.caddy  # call.<domain>      público (login por credencial)
-  - cockpit/cockpit.caddy                   # cockpit.<domain>   só VPN
   - komodo/config/komodo.caddy              # komodo.<domain>    só VPN (/listener/* público)
 
 # Hosts que rodam em outro peer: TLS termina aqui e segue pelo túnel.
