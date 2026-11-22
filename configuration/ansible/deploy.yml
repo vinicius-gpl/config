@@ -30,10 +30,7 @@
     netbird_proxy_domain: ""
     netbird_proxy_address: ""
     # Caddy: sobrescreva por servidor em configuration/servers/<servidor>/vars.yml
-    caddy_sites:
-      - wireguard/config/wireguard.caddy
-      - cockpit/cockpit.caddy
-      - netbird/config/netbird.caddy
+    caddy_sites: []
     caddy_tunnels: []
     vpn_cidr: "100.64.0.0/10"
 
@@ -56,8 +53,10 @@
     # -------------------------------------------------------------------------
     # Apps e Serviços
     # -------------------------------------------------------------------------
+    # Off by default (NetBird replaced it): runs only by tag or with wireguard_enabled=true.
     - name: "[wireguard] Deploy WireGuard (wg-easy)"
       include_tasks: "{{ apps_dir }}/wireguard/ansible/deploy.yml"
+      when: (wireguard_enabled | default(false) | bool) or ('wireguard' in ansible_run_tags)
       tags: [wireguard]
 
     - name: "[caddy] Deploy Caddy Reverse Proxy"
@@ -106,8 +105,10 @@
       include_tasks: "{{ apps_dir }}/netbird/ansible/deploy.proxy.yml"
       tags: [netbird-proxy, netbird_proxy]
 
+    # Off by default (unused): runs only by tag or with cockpit_enabled=true.
     - name: "[cockpit] Instalar e Configurar Cockpit"
       include_tasks: "{{ apps_dir }}/cockpit/ansible/deploy.yml"
+      when: (cockpit_enabled | default(false) | bool) or ('cockpit' in ansible_run_tags)
       tags: [cockpit]
 
     - name: "[sure] Deploy Sure (Maybe Finance)"
