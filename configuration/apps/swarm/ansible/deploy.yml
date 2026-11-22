@@ -32,7 +32,7 @@
   register: swarm_caddy_edge
   failed_when:
     - swarm_caddy_edge.rc != 0
-    - '"already exists" not in swarm_caddy_edge.stderr'
+    - '"already" not in swarm_caddy_edge.stderr'
     - '"No such container" not in swarm_caddy_edge.stderr'
   changed_when: swarm_caddy_edge.rc == 0
   tags: [swarm]
