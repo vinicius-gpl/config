@@ -19,3 +19,6 @@
 /configuration/servers/hetzner/hosts.ini
 /configuration/servers/oracle/hosts.ini
 /configuration/servers/homo/hosts.ini
+
+# Local cache of the Cloudflare CLI (cf)
+.cloudflare/
