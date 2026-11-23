@@ -57,7 +57,7 @@ Se quiser definir seu próprio usuário e senha, basta passar no comando (ou col
 
 ---
 
-## 🚀 Como fazer Deploy (Oracle ou Acerola)
+## 🚀 Como fazer Deploy (Oracle ou Hetzner)
 
 1. Crie o registro DNS `A` para `call.<domain>` apontando para o IP público do servidor (modo **DNS only** na Cloudflare).
 2. *(Apenas na Oracle Cloud)* Certifique-se de liberar no painel da VCN da Oracle as portas de mídia WebRTC: **`7881/tcp`** e **`50100-50200/udp`** (no firewall interno da VM o Ansible já abre sozinho).
@@ -70,8 +70,8 @@ ansible-playbook -i configuration/servers/oracle/hosts.ini configuration/ansible
   -e "element_call_user=vinicius element_call_password=SUA_SENHA_AQUI" \
   --tags element-call
 
-# Servidor Acerola (definindo seu usuário e senha)
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/deploy.yml \
+# Servidor Hetzner (definindo seu usuário e senha)
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/deploy.yml \
   -e "element_call_user=vinicius element_call_password=SUA_SENHA_AQUI" \
   --tags element-call
 ```

@@ -14,7 +14,7 @@ oracle
         │ WebSocket autenticado por par de chaves (o agente é quem conecta)
         │
 oracle  → ws://komodo-core:9120 (mesmo Docker)
-acerola → wss://komodo.vinicius-gpl.com pela VPN (Ansible)
+hetzner → wss://komodo.vinicius-gpl.com pela VPN (Ansible)
 pluto   → wss://komodo.vinicius-gpl.com pela VPN (docker compose desta pasta)
   Komodo Periphery   sem porta publicada; age no Docker local, stacks e repos em /etc/komodo
 ```
@@ -64,7 +64,7 @@ Conferir (na VPN): `https://komodo.vinicius-gpl.com`, login `admin`.
 **2. Onboarding key (manual)**: no painel, **Settings → Onboarding**, crie uma chave reutilizável e
 coloque em `komodo_onboarding_key` no `hosts.ini` (secret `ANSIBLE_HOSTS_INI`) de cada servidor.
 
-**3. Agentes**: etapa `komodo-periphery` em `oracle` e `acerola`. No PLUTO:
+**3. Agentes**: etapa `komodo-periphery` em `oracle` e `hetzner`. No PLUTO:
 
 ```bash
 cd configuration/apps/komodo
@@ -82,7 +82,7 @@ não pode mudar depois que o volume já existe.
 ## Swarm, builders e apps
 
 **Regra: todo app builda no servidor onde roda. Não existe registry (sem GHCR, sem push, sem pull).**
-O Builder `oracle` constrói os apps da Oracle e o Builder `acerola` os do acerola. A imagem fica só
+O Builder `oracle` constrói os apps da Oracle e o Builder `hetzner` os do hetzner. A imagem fica só
 local (`<app>:<commit>`) e a stack sobe com `--resolve-image never`.
 
 O my-config só conhece a infraestrutura. Ela está em [`.komodo/komodo.toml`](../../../.komodo/komodo.toml),
@@ -91,8 +91,8 @@ na raiz do repo:
 | Recurso | O quê |
 |---|---|
 | Sync `config` | aplica o próprio arquivo (webhook no push da `main`) |
-| Swarm `oracle`, `acerola` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
-| Builder `oracle`, `acerola` | cada servidor constrói as próprias imagens |
+| Swarm `oracle`, `hetzner` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
+| Builder `oracle`, `hetzner` | cada servidor constrói as próprias imagens |
 | Deployments `netbird-*`, Stack `element` | NetBird (Deployments) e Element Call + Web (uma Stack). O Ansible gera configs e segredos, o Komodo roda os containers |
 
 O Caddy é um container comum: ele alcança as stacks pela rede overlay `edge` (attachable), que o

@@ -18,11 +18,11 @@ Esta stack provê monitoramento detalhado de recursos de hardware e containers D
 Por padrão, a stack só é implantada quando você passar a tag explicitamente (para evitar consumo acidental de RAM em servidores com pouca memória):
 
 ```bash
-# Deploy no servidor alvo (ex: acerola ou oracle)
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/deploy.yml --tags "monitoring"
+# Deploy no servidor alvo (ex: hetzner ou oracle)
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/deploy.yml --tags "monitoring"
 
 # Ou passar a flag via extra-vars:
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/deploy.yml -e "monitoring_enabled=true"
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/deploy.yml -e "monitoring_enabled=true"
 ```
 
 ---
@@ -31,10 +31,10 @@ ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/an
 
 ```bash
 # Parar e remover containers
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/clean.yml --tags "monitoring"
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/clean.yml --tags "monitoring"
 
 # Remover também os volumes de dados persistentes:
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/clean.yml --tags "monitoring" -e "remove_volumes=true"
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/clean.yml --tags "monitoring" -e "remove_volumes=true"
 ```
 
 ---
