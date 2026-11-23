@@ -29,8 +29,8 @@
   tags: [element-web, element_web]
 
 - name: "[element-web] Implantar configuração element-web.caddy"
-  copy:
-    src: "{{ apps_dir }}/element-web/config/element-web.caddy"
+  template:
+    src: "{{ apps_dir }}/element-web/config/element-web.caddy.j2"
     dest: "{{ caddy_path }}/conf.d/element-web.caddy"
     mode: '0644'
   failed_when: false
@@ -46,7 +46,7 @@
   when: not ansible_check_mode
   tags: [element-web, element_web]
 
-- name: "[element-web] Recarregar Caddy para aplicar chat.{{ domain | default('') }}"
+- name: "[element-web] Recarregar Caddy para aplicar chat.{{ element_domain }}"
   command: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
   failed_when: false
   tags: [element-web, element_web]

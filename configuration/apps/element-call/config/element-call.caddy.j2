@@ -1,4 +1,4 @@
-call.{$DOMAIN} {
+call.{{ element_domain }} {
     header {
         Strict-Transport-Security "max-age=31536000;"
         X-Content-Type-Options "nosniff"
@@ -10,12 +10,12 @@ call.{$DOMAIN} {
     handle /.well-known/matrix/client {
         header Content-Type application/json
         header Access-Control-Allow-Origin "*"
-        respond `{"m.homeserver":{"base_url":"https://call.{$DOMAIN}"},"org.matrix.msc4143.rtc_foci":[{"type":"livekit","livekit_service_url":"https://call.{$DOMAIN}/livekit/jwt"}]}` 200
+        respond `{"m.homeserver":{"base_url":"https://call.{{ element_domain }}"},"org.matrix.msc4143.rtc_foci":[{"type":"livekit","livekit_service_url":"https://call.{{ element_domain }}/livekit/jwt"}]}` 200
     }
 
     handle /.well-known/matrix/server {
         header Content-Type application/json
-        respond `{"m.server":"call.{$DOMAIN}:443"}` 200
+        respond `{"m.server":"call.{{ element_domain }}:443"}` 200
     }
 
     # Matrix Synapse (Client-Server, Federation OpenID e Admin)

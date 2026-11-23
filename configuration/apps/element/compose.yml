@@ -1,5 +1,5 @@
 # Element (Matrix): Element Call (Synapse, LiveKit, lk-jwt-service, frontend) and Element Web,
-# as a single Komodo Stack on the oracle server (.komodo/komodo.toml next to this file).
+# as a single Komodo Stack on the hetzner server (.komodo/komodo.toml next to this file).
 #
 # Ansible (steps element-call and element-web) renders every config this stack mounts from
 # /opt/element-call/config and /opt/element-web/config, including the LiveKit key file, and
@@ -28,6 +28,8 @@ services:
     image: matrixdotorg/synapse:v1.163.0
     container_name: element-synapse
     restart: unless-stopped
+    # Reaps the child processes Synapse leaves behind (they piled up as zombies).
+    init: true
     environment:
       - SYNAPSE_CONFIG_PATH=/etc/synapse/homeserver.yaml
       - UID=0

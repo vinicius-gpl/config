@@ -1,16 +1,16 @@
 # Komodo resources of element (config). Applied by the "element" Resource Sync declared in
-# .komodo/komodo.toml at the repo root. Tags: env:oracle and app:element.
+# .komodo/komodo.toml at the repo root. Tags: env:hetzner and app:element.
 #
 # One Stack for Element Call + Element Web (compose.yml next to this folder): one deploy for all
 # five containers. Ansible renders the configs and the LiveKit key file the stack mounts.
 
 [[stack]]
 name = "element"
-description = "Element Call (Synapse, LiveKit, lk-jwt e frontend) e Element Web na Oracle"
-tags = ["env:oracle", "app:element"]
+description = "Element Call (Synapse, LiveKit, lk-jwt e frontend) e Element Web no hetzner"
+tags = ["env:hetzner", "app:element"]
 deploy = true
 [stack.config]
-server = "oracle"
+server = "hetzner"
 git_provider = "github.com"
 repo = "vinicius-gpl/config"
 branch = "main"
