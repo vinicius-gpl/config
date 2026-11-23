@@ -6,6 +6,9 @@
 # Ansible (steps element-call and element-web) renders every config these mount from
 # /opt/element-call/config and /opt/element-web/config, plus the Caddy sites. The container names
 # are the Caddy upstreams, on the proxy network.
+#
+# Sized for two people (calls and screen sharing): each container has a --memory ceiling so the
+# stack never takes the memory of the other apps on the server.
 
 [[deployment]]
 name = "element-synapse"
@@ -30,7 +33,7 @@ UID=0
 GID=0
 """
 # --init reaps the child processes Synapse leaves behind (they piled up as zombies).
-extra_args = ["--init", "--entrypoint=/bin/sh", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
+extra_args = ["--init", "--entrypoint=/bin/sh", "--memory=512m", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
 links = ["https://call.vinicius-gpl.com"]
 
 [[deployment]]
@@ -50,7 +53,7 @@ ports = """
 50100-50200:50100-50200/udp
 """
 volumes = "/opt/element-call/config/livekit.yaml:/etc/livekit.yaml:ro"
-extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
+extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--memory=256m", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
 links = ["https://call.vinicius-gpl.com"]
 
 [[deployment]]
@@ -73,7 +76,7 @@ LIVEKIT_FULL_ACCESS_HOMESERVERS=call.vinicius-gpl.com
 LIVEKIT_CS_API_URL_OVERRIDES=call.vinicius-gpl.com=http://element-synapse:8008
 """
 volumes = "/opt/element-call/config/livekit.keys:/etc/lk-jwt/livekit.keys:ro"
-extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
+extra_args = ["--add-host=call.vinicius-gpl.com:host-gateway", "--memory=64m", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
 links = ["https://call.vinicius-gpl.com"]
 
 [[deployment]]
@@ -89,7 +92,7 @@ image.params.image = "ghcr.io/element-hq/element-call:v0.28.0"
 network = "proxy"
 restart = "unless-stopped"
 volumes = "/opt/element-call/config/config.json:/app/config.json:ro"
-extra_args = ["--log-opt=max-size=50m", "--log-opt=max-file=2"]
+extra_args = ["--memory=64m", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
 links = ["https://call.vinicius-gpl.com"]
 
 [[deployment]]
@@ -105,5 +108,5 @@ image.params.image = "vectorim/element-web:v1.12.32"
 network = "proxy"
 restart = "unless-stopped"
 volumes = "/opt/element-web/config/config.json:/app/config.json:ro"
-extra_args = ["--log-opt=max-size=50m", "--log-opt=max-file=2"]
+extra_args = ["--memory=64m", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
 links = ["https://chat.vinicius-gpl.com", "https://element.vinicius-gpl.com"]
