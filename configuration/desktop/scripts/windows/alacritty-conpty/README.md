@@ -47,10 +47,11 @@ Feche todas as janelas do Alacritty e rode em **outro terminal** (ex.: Windows T
 pois com o Alacritty aberto o `conpty.dll` fica travado:
 
 ```powershell
-# Instalar a última versão estável
+# Instalar a versão fixada (1.24.260710001)
 .\install-conpty.ps1
 
-# Versão específica
+# Última versão estável / versão específica
+.\install-conpty.ps1 -Version latest
 .\install-conpty.ps1 -Version 1.24.260710001
 
 # Pasta do Alacritty manual (se não estiver no PATH)
@@ -71,6 +72,10 @@ O script detecta a pasta pelo comando `alacritty` e resolve o shim do scoop
 
 > **Atenção (scoop):** `scoop update alacritty` cria uma pasta nova para a versão e os
 > arquivos somem. **Rode o script novamente após cada atualização.**
+
+> **Versão fixada:** a `1.25.260930003` quebra o pwsh dentro do zellij (prompt do
+> oh-my-posh sem cor, sugestões do PSReadLine desenhadas longe do cursor). Por isso o
+> script instala a `1.24.260710001` por padrão. Teste novas versões com `-Version`.
 
 ## Verificar se está funcionando
 
