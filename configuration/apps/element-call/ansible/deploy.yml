@@ -120,7 +120,7 @@
   failed_when: false
   tags: [element-call, element_call]
 
-# The containers are the Komodo Stack "element" (apps/element). Ansible only renders the configs
+# The containers are the Komodo Deployments element-* (apps/element). Ansible only renders the configs
 # they mount; the admin user is created once Komodo has started Synapse.
 - name: "[element-call] Conferir se o Synapse já está rodando (Komodo)"
   command: docker inspect --format '{{ "{{" }}.State.Running{{ "}}" }}' element-synapse

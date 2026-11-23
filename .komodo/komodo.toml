@@ -6,7 +6,7 @@
 #   Builder     one per server. EVERY APP BUILDS ON THE SERVER IT RUNS ON: oracle builds the oracle
 #               apps, hetzner builds the hetzner apps. NO REGISTRY: no GHCR, no push, no pull.
 #               Images stay local (<app>:<commit>) and stacks deploy them with --resolve-image never.
-#   Apps        config's own apps (NetBird Deployments, Element Stack) live in each app's
+#   Apps        config's own apps (NetBird and Element Deployments) live in each app's
 #               .komodo/komodo.toml. Ansible renders the configs and secrets they mount
 #               from /opt/<app>; Komodo runs the containers.
 #
@@ -42,7 +42,7 @@ delete = false
 
 [[resource_sync]]
 name = "element"
-description = "Aplica a Stack do Element (Call + Web) no hetzner"
+description = "Aplica os Deployments do Element (Call + Web) no hetzner"
 tags = ["env:hetzner", "app:element"]
 [resource_sync.config]
 git_provider = "github.com"
