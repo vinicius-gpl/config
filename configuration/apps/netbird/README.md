@@ -45,7 +45,7 @@ IP_DO_SERVIDOR ansible_user=root domain=seu-dominio.com email=admin@seu-dominio.
 
 ### Via GitHub Actions:
 1. Vá na aba **Actions** > **Ansible Deploy** > **Run workflow**.
-2. Selecione o servidor alvo: `oracle` (ou `acerola`).
+2. Selecione o servidor alvo: `oracle` (ou `hetzner`).
 3. Selecione a etapa: **`netbird`**.
 4. Clique em **Run workflow**.
 

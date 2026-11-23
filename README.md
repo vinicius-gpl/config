@@ -10,7 +10,7 @@ Repositório central de configurações, automações de infraestrutura e dotfil
 configuration/
 ├── servers/             # 🖥️ Inventários e variáveis por SERVIDOR (independente de distro)
 │   ├── REDE.md          # Arquitetura da rede: DNS, VPN, acesso e fluxos
-│   ├── acerola/         # Servidor Acerola
+│   ├── hetzner/         # Servidor Hetzner
 │   ├── oracle/          # Servidor Oracle (borda pública, NetBird, vars.yml)
 │   └── pluto/           # Desktop PLUTO (serviços locais publicados via Oracle)
 │
@@ -57,7 +57,7 @@ O repositório conta com dois workflows dedicados:
 
 ### Deploy de Serviços:
 1. Vá na aba **Actions** > **Ansible Deploy** > **Run workflow**.
-2. Selecione o **servidor alvo**: `acerola` ou `oracle`.
+2. Selecione o **servidor alvo**: `hetzner` ou `oracle`.
 3. Selecione a **etapa / app**: `all`, `base`, `wireguard`, `netbird`, `netbird-client`, `caddy`, `portainer`, `portainer-agent`, `coolify`, `supabase`, `beszel`, `beszel-hub`, `netbird-proxy`, `cockpit`, `sure`, `element-call`, `element-web`, `monitoring`, `komodo`, `komodo-periphery` ([detalhes](configuration/apps/komodo/README.md)).
 4. Clique em **Run workflow**.
 
@@ -66,19 +66,19 @@ do deploy (configuração não secreta do servidor, versionada no repositório).
 
 ### Limpeza / Remoção Controlada de Serviços:
 1. Vá na aba **Actions** > **Ansible Clean** > **Run workflow**.
-2. Selecione o **servidor alvo**: `acerola` ou `oracle`.
+2. Selecione o **servidor alvo**: `hetzner` ou `oracle`.
 3. Selecione o **serviço para deitar**: `dashboards` (Beszel Hub + Portainer Server), `beszel-hub`, `portainer`, `portainer-agent`, `beszel-agent`, `wireguard`, `netbird`, `netbird-client`, `netbird-proxy`, `caddy`, `cockpit`, `sure`, `coolify`, `supabase`, `monitoring`, `komodo`, `komodo-periphery` ou `prune`.
 4. Marque se deseja apagar os volumes de dados persistentes (`remove_volumes`).
 5. Clique em **Run workflow**.
 
 ### Autenticação no GitHub (Environments)
-Você pode cadastrar as credenciais em **Settings > Environments** criando um ambiente para cada servidor (`acerola` e `oracle`):
+Você pode cadastrar as credenciais em **Settings > Environments** criando um ambiente para cada servidor (`hetzner` e `oracle`):
 - `SSH_PRIVATE_KEY`
 - `ANSIBLE_HOSTS_INI` (veja modelos em [`configuration/servers/HOSTS_FORMATS.md`](configuration/servers/HOSTS_FORMATS.md))
 - `SSH_PASSPHRASE` (opcional)
 - `ANSIBLE_BECOME_PASSWORD` (opcional)
 
-*(Se não usar Environments, o workflow também aceita secrets com prefixo do servidor, ex: `ACEROLA_ANSIBLE_HOSTS_INI` ou `ORACLE_ANSIBLE_HOSTS_INI`).*
+*(Se não usar Environments, o workflow também aceita secrets com prefixo do servidor, ex: `HETZNER_ANSIBLE_HOSTS_INI` ou `ORACLE_ANSIBLE_HOSTS_INI`).*
 
 Consulte o [**Guia de Formatos de Inventário (`HOSTS_FORMATS.md`)**](configuration/servers/HOSTS_FORMATS.md) para todos os modelos prontos de `hosts.ini`.
 
@@ -89,11 +89,11 @@ Consulte o [**Guia de Formatos de Inventário (`HOSTS_FORMATS.md`)**](configurat
 Para rodar qualquer deploy diretamente da sua máquina:
 
 ```bash
-# Exemplo 1: Subir tudo no servidor acerola
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/deploy.yml
+# Exemplo 1: Subir tudo no servidor hetzner
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/deploy.yml
 
-# Exemplo 2: Subir apenas o WireGuard e o Caddy no servidor acerola
-ansible-playbook -i configuration/servers/acerola/inventory.ini configuration/ansible/deploy.yml --tags "wireguard,caddy"
+# Exemplo 2: Subir apenas o WireGuard e o Caddy no servidor hetzner
+ansible-playbook -i configuration/servers/hetzner/inventory.ini configuration/ansible/deploy.yml --tags "wireguard,caddy"
 
 # Exemplo 3: Subir Coolify e Supabase no servidor oracle
 ansible-playbook -i configuration/servers/oracle/inventory.ini configuration/ansible/deploy.yml --tags "coolify,supabase"

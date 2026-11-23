@@ -19,7 +19,7 @@ IP_DO_SERVIDOR ansible_user=root variavel1=valor variavel2=valor
 
 ---
 
-## 1. Formato: Servidor Relay (Acerola)
+## 1. Formato: Servidor Relay (Hetzner)
 > **Apps típicos:** Caddy (Reverse Proxy com SSL) + WireGuard (wg-easy) + Portainer + Beszel Agent.
 
 ```ini

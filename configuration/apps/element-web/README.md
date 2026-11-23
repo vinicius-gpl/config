@@ -30,7 +30,7 @@ O **Element Web** atua como o frontend visual de mensagens e colaboração, cone
 
 ### Deploy via GitHub Actions
 1. Vá em **Actions** > **Ansible Deploy** > **Run workflow**.
-2. Servidor alvo: `oracle` (ou `acerola`).
+2. Servidor alvo: `oracle` (ou `hetzner`).
 3. App / Etapa: `element-web`.
 4. Clique em **Run workflow**.
 

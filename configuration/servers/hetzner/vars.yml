@@ -1,0 +1,8 @@
+# Non-secret variables for the hetzner server (loaded by the deploy workflow and,
+# locally, with `-e @configuration/servers/hetzner/vars.yml`).
+
+# Single-node Swarm: Komodo runs the app stacks here (apps/swarm).
+swarm_enabled: true
+
+# Komodo agent name in the panel (the `swarm`/`server` of the stacks).
+komodo_server_name: hetzner

@@ -8,7 +8,8 @@
     Veja o README.md desta pasta para entender o motivo.
 
 .PARAMETER Version
-    Versao do pacote no NuGet. Padrao: ultima versao estavel.
+    Versao do pacote no NuGet. Padrao: 1.24.260710001 (a 1.25.260930003 tira as cores e
+    desalinha o cursor do pwsh dentro do zellij). Use -Version latest para a ultima estavel.
 
 .PARAMETER AlacrittyDir
     Pasta onde esta o alacritty.exe. Padrao: detectada pelo comando "alacritty" (inclui shim do scoop).
@@ -23,7 +24,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string] $Version,
+    [string] $Version = '1.24.260710001',
     [string] $AlacrittyDir,
     [switch] $Uninstall
 )
@@ -74,7 +75,7 @@ $arch = switch ($env:PROCESSOR_ARCHITECTURE) {
 }
 
 $feed = 'https://api.nuget.org/v3-flatcontainer/microsoft.windows.console.conpty'
-if (-not $Version) {
+if ($Version -eq 'latest') {
     $Version = (Invoke-RestMethod "$feed/index.json").versions |
         Where-Object { $_ -notmatch '-' } |
         Select-Object -Last 1

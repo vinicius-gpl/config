@@ -20,7 +20,7 @@ Este é o documento central; os READMEs de cada servidor e app apontam para cá.
 |---|---|---|---|
 | Oracle (`vivy`) | VPS Rocky Linux 9, borda pública, servidor NetBird | `168.138.133.78` | `100.96.113.83` |
 | PLUTO | Desktop Fedora, serviços locais | atrás de NAT | `100.96.62.172` |
-| Acerola | Servidor, agente Edge do Portainer | `178.105.95.169` | `100.96.151.221` |
+| Hetzner | Servidor pessoal (Hetzner), Komodo Periphery e Swarm | `178.105.95.169` | `100.96.151.221` |
 | ALOHA-OE | Cliente Windows | — | `100.96.5.116` |
 | BEBOP | Cliente Android | — | `100.96.10.180` |
 
@@ -89,7 +89,7 @@ A rota é criada à mão no painel e **não é gerenciada pelo Ansible**. Para r
 `https://netbird.vinicius-gpl.com/network-routes` → **Add Route** → preencher os campos acima.
 
 Efeitos da rota em todo peer da VPN: SSH e HTTPS para a Oracle passam pelo túnel, e o agente Edge do
-Portainer na Acerola fala com `container.vinicius-gpl.com` pela VPN.
+Portainer na Hetzner fala com `container.vinicius-gpl.com` pela VPN.
 
 ### 3. IP público no loopback da Oracle
 
