@@ -17,6 +17,8 @@
     sure_path: "/opt/sure"
     element_call_path: "/opt/element-call"
     element_web_path: "/opt/element-web"
+    # Element keeps its own domain on any server (the hetzner inventory's `domain` is acerola.app).
+    element_domain: "vinicius-gpl.com"
     monitoring_path: "/opt/monitoring"
     komodo_path: "/opt/komodo"
     komodo_periphery_path: "/opt/komodo-periphery"

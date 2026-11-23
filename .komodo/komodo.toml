@@ -42,8 +42,8 @@ delete = false
 
 [[resource_sync]]
 name = "element"
-description = "Aplica a Stack do Element (Call + Web) na Oracle"
-tags = ["env:oracle", "app:element"]
+description = "Aplica a Stack do Element (Call + Web) no hetzner"
+tags = ["env:hetzner", "app:element"]
 [resource_sync.config]
 git_provider = "github.com"
 repo = "vinicius-gpl/config"

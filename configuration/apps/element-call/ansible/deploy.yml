@@ -113,8 +113,8 @@
   tags: [element-call, element_call]
 
 - name: "[element-call] Implantar configuração element-call.caddy"
-  copy:
-    src: "{{ apps_dir }}/element-call/config/element-call.caddy"
+  template:
+    src: "{{ apps_dir }}/element-call/config/element-call.caddy.j2"
     dest: "{{ caddy_path }}/conf.d/element-call.caddy"
     mode: '0644'
   failed_when: false
@@ -163,7 +163,7 @@
   when: synapse_running.stdout == 'true' and not ansible_check_mode
   tags: [element-call, element_call]
 
-- name: "[element-call] Recarregar Caddy para aplicar call.{{ domain | default('') }}"
+- name: "[element-call] Recarregar Caddy para aplicar call.{{ element_domain }}"
   command: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
   failed_when: false
   tags: [element-call, element_call]
