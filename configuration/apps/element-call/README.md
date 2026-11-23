@@ -4,7 +4,7 @@ O **Element Call** é a plataforma de videoconferência com criptografia ponta-a
 
 ---
 
-> **Deploy:** os 4 containers, junto com o Element Web, são a Stack `element` do Komodo (`configuration/apps/element`). O Ansible
+> **Deploy:** os 4 containers, junto com o Element Web, são Deployments `element-*` do Komodo no hetzner (`configuration/apps/element`). O Ansible
 > (etapa `element-call`) só gera as configs em `/opt/element-call/config`, o site do Caddy e as regras de
 > firewall, e cria o usuário admin depois que o Komodo sobe o Synapse.
 

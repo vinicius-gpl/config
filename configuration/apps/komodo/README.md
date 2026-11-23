@@ -93,7 +93,7 @@ na raiz do repo:
 | Sync `config` | aplica o próprio arquivo (webhook no push da `main`) |
 | Swarm `oracle`, `hetzner` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
 | Builder `oracle`, `hetzner` | cada servidor constrói as próprias imagens |
-| Deployments `netbird-*`, Stack `element` | NetBird (Deployments) e Element Call + Web (uma Stack). O Ansible gera configs e segredos, o Komodo roda os containers |
+| Deployments `netbird-*` e `element-*` | NetBird (oracle) e Element Call + Web (hetzner). Imagem pronta de registry vira Deployment; app buildado do repo vira Build + Stack. O Ansible gera configs e segredos, o Komodo roda os containers |
 
 O Caddy é um container comum: ele alcança as stacks pela rede overlay `edge` (attachable), que o
 Ansible cria e na qual conecta o Caddy.
@@ -113,11 +113,9 @@ não sabe nada dos apps.
 - **Segredos dos apps**: Variables secretas do Komodo, usadas como `[[NOME]]`.
 
 **Primeira vez**: crie à mão a Sync `config` (repo `vinicius-gpl/config`, branch `main`,
-resource path `.komodo/komodo.toml`) e execute. Depois crie as Variables secretas
-`ELEMENT_LIVEKIT_KEY` e `ELEMENT_LIVEKIT_SECRET` com os valores de `/opt/element-call/secrets.yml`
-da Oracle (ou fixe os dois no `hosts.ini` com `element_call_livekit_key`/`element_call_livekit_secret`).
-Os Deployments do Element têm os mesmos nomes dos containers atuais: o Komodo substitui cada um no
-primeiro deploy. Rode a etapa `element-call` do Ansible depois, para criar o usuário admin.
+resource path `.komodo/komodo.toml`) e execute. Para o Element, rode antes as etapas `element-call`
+e `element-web` do Ansible no hetzner (geram as configs que os Deployments montam) e, depois do
+deploy, `element-call` de novo para criar o usuário admin.
 ## Replicar o Komodo (o mesmo setup em outro lugar)
 
 - **Outro servidor como painel**: rode a etapa `komodo` nele (com `komodo_admin_password` e o
