@@ -93,7 +93,7 @@ na raiz do repo:
 | Sync `config` | aplica o próprio arquivo (webhook no push da `main`) |
 | Swarm `oracle`, `acerola` | um Swarm de um nó por servidor (o Ansible faz o `swarm init`, etapa `swarm`) |
 | Builder `oracle`, `acerola` | cada servidor constrói as próprias imagens |
-| Deployments `netbird-*`, `element-*` | NetBird, Element Call e Web. O Ansible gera configs e segredos, o Komodo roda os containers |
+| Deployments `netbird-*`, Stack `element` | NetBird (Deployments) e Element Call + Web (uma Stack). O Ansible gera configs e segredos, o Komodo roda os containers |
 
 O Caddy é um container comum: ele alcança as stacks pela rede overlay `edge` (attachable), que o
 Ansible cria e na qual conecta o Caddy.

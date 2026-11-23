@@ -82,6 +82,16 @@
     mode: '0600'
   tags: [element-call, element_call]
 
+# Read by lk-jwt-service (LIVEKIT_KEY_FILE, "key: secret" format), so the LiveKit secret never
+# goes through Komodo Variables. Same key/secret as livekit.yaml.
+- name: "[element-call] Gravar a chave do LiveKit para o lk-jwt-service"
+  copy:
+    dest: "{{ element_call_path }}/config/livekit.keys"
+    content: "{{ ec_livekit_key }}: {{ ec_livekit_secret }}\n"
+    mode: '0644'
+  no_log: true
+  tags: [element-call, element_call]
+
 - name: "[element-call] Abrir portas WebRTC do LiveKit no firewall (7881/tcp e 50100-50200/udp)"
   firewalld:
     port: "{{ item }}"
@@ -110,7 +120,7 @@
   failed_when: false
   tags: [element-call, element_call]
 
-# The containers are Komodo Deployments (.komodo/komodo.toml). Ansible only renders the configs
+# The containers are the Komodo Stack "element" (apps/element). Ansible only renders the configs
 # they mount; the admin user is created once Komodo has started Synapse.
 - name: "[element-call] Conferir se o Synapse já está rodando (Komodo)"
   command: docker inspect --format '{{ "{{" }}.State.Running{{ "}}" }}' element-synapse

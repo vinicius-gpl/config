@@ -1,13 +1,14 @@
 # Komodo resources owned by config: the infrastructure of each server and nothing about the apps.
 #
-#   Sync        "config" applies this file; one more Sync per app (netbird, element-call,
-#               element-web) applies configuration/apps/<app>/.komodo/komodo.toml.
+#   Sync        "config" applies this file; one more Sync per app (netbird, element)
+#               applies configuration/apps/<app>/.komodo/komodo.toml.
 #   Swarm       one single-node Swarm per server (oracle, acerola); they never join each other.
 #   Builder     one per server. EVERY APP BUILDS ON THE SERVER IT RUNS ON: oracle builds the oracle
 #               apps, acerola builds the acerola apps. NO REGISTRY: no GHCR, no push, no pull.
 #               Images stay local (<app>:<commit>) and stacks deploy them with --resolve-image never.
-#   Deployment  config's own containers, in each app's .komodo/komodo.toml. Ansible renders
-#               the configs and secrets they mount from /opt/<app>; Komodo runs them.
+#   Apps        config's own apps (NetBird Deployments, Element Stack) live in each app's
+#               .komodo/komodo.toml. Ansible renders the configs and secrets they mount
+#               from /opt/<app>; Komodo runs the containers.
 #
 # Each app repo owns its .komodo/komodo.toml (Repo, Build, Stack, Procedure, Action, Sync) and
 # points to the names below: swarm "<server>", builder "<server>", network "edge".
@@ -37,26 +38,17 @@ branch = "main"
 resource_path = ["configuration/apps/netbird/.komodo/komodo.toml"]
 delete = false
 
-[[resource_sync]]
-name = "element-call"
-description = "Aplica os recursos do Element Call (Synapse, LiveKit, lk-jwt e frontend) na Oracle"
-tags = ["env:oracle", "app:element-call"]
-[resource_sync.config]
-git_provider = "github.com"
-repo = "vinicius-gpl/config"
-branch = "main"
-resource_path = ["configuration/apps/element-call/.komodo/komodo.toml"]
-delete = false
+
 
 [[resource_sync]]
-name = "element-web"
-description = "Aplica os recursos do Element Web na Oracle"
-tags = ["env:oracle", "app:element-web"]
+name = "element"
+description = "Aplica a Stack do Element (Call + Web) na Oracle"
+tags = ["env:oracle", "app:element"]
 [resource_sync.config]
 git_provider = "github.com"
 repo = "vinicius-gpl/config"
 branch = "main"
-resource_path = ["configuration/apps/element-web/.komodo/komodo.toml"]
+resource_path = ["configuration/apps/element/.komodo/komodo.toml"]
 delete = false
 
 # ── Swarms ──────────────────────────────────────────────────────────────────────────────────
