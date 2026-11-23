@@ -8,7 +8,7 @@ Este diretório contém a infraestrutura e templates para o gerenciamento centra
 
 ```text
 ┌──────────────────────────────────────┐             ┌──────────────────────────────────┐
-│        ORACLE CLOUD (CENTRAL)        │             │         ACEROLA (WORKER)         │
+│        ORACLE CLOUD (CENTRAL)        │             │         HETZNER (WORKER)         │
 │                                      │             │                                  │
 │  Caddy (Reverse Proxy)               │             │  Portainer Edge Agent            │
 │  └── 443 -> portainer:9443 (HTTPS)   │  ◄─ HTTPS ──┼─── Heartbeat / Poll API          │
@@ -20,7 +20,7 @@ Este diretório contém a infraestrutura e templates para o gerenciamento centra
 ```
 
 * **Servidor Central (Oracle):** Roda o container `portainer/portainer-ee:lts` com persistência no volume `portainer-data` e proxy reverso no Caddy em `https://container.vinicius-gpl.com`.
-* **Nós Remotos (Acerola e outros workers):** Rodam o container `portainer-edge-agent` (`portainer/agent:2.45.2`), conectando-se de dentro para fora (outbound) na Oracle via túnel reverso.
+* **Nós Remotos (Hetzner e outros workers):** Rodam o container `portainer-edge-agent` (`portainer/agent:2.45.2`), conectando-se de dentro para fora (outbound) na Oracle via túnel reverso.
 
 ---
 
@@ -52,11 +52,11 @@ Este diretório contém a infraestrutura e templates para o gerenciamento centra
 
 ---
 
-### 2. Conectar um Servidor Remoto (Acerola / Workers)
+### 2. Conectar um Servidor Remoto (Hetzner / Workers)
 1. No Portainer Central, vá em **Environments** > **Add environment** > **Edge Agent Docker**.
-2. Dê um nome ao ambiente (ex: `Acerola`).
+2. Dê um nome ao ambiente (ex: `Hetzner`).
 3. O Portainer exibirá o comando com o `EDGE_ID` e a `EDGE_KEY`.
-4. Cadastre as duas variáveis no seu `inventory.ini` ou na Secret `ACEROLA_ANSIBLE_HOSTS_INI`:
+4. Cadastre as duas variáveis no seu `inventory.ini` ou na Secret `HETZNER_ANSIBLE_HOSTS_INI`:
    ```ini
    [servers]
    178.105.95.169 ansible_user=root ansible_ssh_forward_agent=true \
@@ -65,7 +65,7 @@ Este diretório contém a infraestrutura e templates para o gerenciamento centra
      portainer_edge_key="SUA_EDGE_KEY"
    ```
 5. Rode a Action **Ansible Deploy**:
-   - `server`: `acerola`
+   - `server`: `hetzner`
    - `step`: `portainer-agent`
 6. O status no painel mudará para **Heartbeat (verde)** e a gestão dos containers estará disponível.
 

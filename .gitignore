@@ -16,6 +16,6 @@
 /configuration/linux/global/docker/traefik/authelia
 /configuration/linux/fedora/ansible/hosts.ini
 /configuration/linux/rocky/ansible/hosts.ini
-/configuration/servers/acerola/hosts.ini
+/configuration/servers/hetzner/hosts.ini
 /configuration/servers/oracle/hosts.ini
 /configuration/servers/homo/hosts.ini

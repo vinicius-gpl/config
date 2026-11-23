@@ -2,7 +2,7 @@
 # =========================================================================
 # === DOCKER SWARM (ONE NODE PER SERVER) + EDGE NETWORK ===
 # =========================================================================
-# Each server is its own Swarm with a single manager: oracle and acerola never join each other.
+# Each server is its own Swarm with a single manager: oracle and hetzner never join each other.
 # Apps run as Komodo stacks on that Swarm, and Caddy (a plain container) reaches them through
 # the attachable overlay network `edge`.
 
