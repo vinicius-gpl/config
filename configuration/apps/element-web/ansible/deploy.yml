@@ -36,7 +36,7 @@
   failed_when: false
   tags: [element-web, element_web]
 
-# The container is part of the Komodo Stack "element" (apps/element); Ansible only renders the config it mounts.
+# The container is the Komodo Deployment element-web (apps/element); Ansible only renders the config it mounts.
 - name: "[element-web] Reiniciar o container para ler a config nova (se o Komodo já subiu)"
   command: docker restart element-web
   register: element_web_restart
