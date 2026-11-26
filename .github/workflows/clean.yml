@@ -35,6 +35,7 @@ on:
           - coolify
           - supabase
           - monitoring
+          - postgres
           - komodo
           - komodo-periphery
           - swarm
