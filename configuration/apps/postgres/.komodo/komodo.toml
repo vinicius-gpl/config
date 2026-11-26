@@ -32,6 +32,8 @@ postgres-data:/var/lib/postgresql/data
 """
 environment = """
 POSTGRES_PASSWORD=[[POSTGRES_PASSWORD]]
+# Client tools inside the container (the pg_isready healthcheck runs as root) connect as postgres.
+PGUSER=postgres
 PGAPP_ACEROLA_SYNC_PASSWORD=[[ACEROLA_SYNC_DB_PASSWORD]]
 """
 extra_args = ["--memory=256m", "--shm-size=64m", "--health-cmd=pg_isready", "--health-interval=30s", "--log-opt=max-size=50m", "--log-opt=max-file=2"]
