@@ -1,7 +1,7 @@
 # Postgres: banco dos apps do hetzner
 
-Um Postgres só (`postgres:17-alpine`) para os apps do servidor, cada um com o seu banco e o seu
-usuário. Substitui o Neon: lá o compute era cobrado por tempo ligado e um app com worker nunca
+Um Postgres só (`postgres:19-alpine`, a mesma linha do Neon, que oferece 18 e 19) para os apps do
+servidor, cada um com o seu banco e o seu usuário. Substitui o Neon: lá o compute era cobrado por tempo ligado e um app com worker nunca
 deixava o banco dormir; aqui ele custa só a memória do container.
 
 ```text
@@ -67,5 +67,7 @@ pg_dump "<url de origem>" --no-owner --no-privileges --data-only | docker exec -
 - Sem porta publicada: só quem está na rede `edge` chega nele. Para administrar, `docker exec`.
 - `--memory=256m`, `shared_buffers=64MB`, `max_connections=40`: o servidor tem 3,5 GB para tudo.
   Se um app precisar de mais, suba os três juntos.
-- Trocar a imagem de versão maior (17 → 18) exige `pg_dumpall` antes e restauração depois: o
-  volume de dados não é compatível entre versões maiores.
+- Trocar a imagem de versão maior (19 → 20) exige `pg_dumpall` antes, volume novo e restauração
+  depois: o volume de dados não é compatível entre versões maiores. Da 18 em diante o volume
+  monta `/var/lib/postgresql` (os dados ficam em `<major>/docker` dentro dele).
+- Para copiar dados de outro Postgres, a origem precisa ser da mesma versão maior ou mais antiga.
