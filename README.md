@@ -23,6 +23,7 @@ configuration/
 │   ├── supabase/        # Backend self-hosted (Postgres, Kong, Studio, Storage)
 │   ├── beszel/          # Monitoramento de hardware e containers (Hub e Agent)
 │   ├── komodo/          # Painel de deploy (Core na Oracle) e agente Periphery nos servidores
+│   ├── postgres/        # Postgres dos apps do hetzner (um banco e um usuário por app)
 │   ├── cockpit/         # Painel administrativo do host
 │   ├── element-call/    # Videoconferência Matrix (MatrixRTC + LiveKit)
 │   ├── element-web/     # Chat e mensagens Matrix (Slack/Discord open source)
@@ -58,7 +59,7 @@ O repositório conta com dois workflows dedicados:
 ### Deploy de Serviços:
 1. Vá na aba **Actions** > **Ansible Deploy** > **Run workflow**.
 2. Selecione o **servidor alvo**: `hetzner` ou `oracle`.
-3. Selecione a **etapa / app**: `all`, `base`, `wireguard`, `netbird`, `netbird-client`, `caddy`, `portainer`, `portainer-agent`, `coolify`, `supabase`, `beszel`, `beszel-hub`, `netbird-proxy`, `cockpit`, `sure`, `element-call`, `element-web`, `monitoring`, `komodo`, `komodo-periphery` ([detalhes](configuration/apps/komodo/README.md)).
+3. Selecione a **etapa / app**: `all`, `base`, `wireguard`, `netbird`, `netbird-client`, `caddy`, `portainer`, `portainer-agent`, `coolify`, `supabase`, `beszel`, `beszel-hub`, `netbird-proxy`, `cockpit`, `sure`, `element-call`, `element-web`, `monitoring`, `postgres` ([detalhes](configuration/apps/postgres/README.md)), `komodo`, `komodo-periphery` ([detalhes](configuration/apps/komodo/README.md)).
 4. Clique em **Run workflow**.
 
 Se existir `configuration/servers/<servidor>/vars.yml`, o workflow carrega esse arquivo como variáveis
@@ -67,7 +68,7 @@ do deploy (configuração não secreta do servidor, versionada no repositório).
 ### Limpeza / Remoção Controlada de Serviços:
 1. Vá na aba **Actions** > **Ansible Clean** > **Run workflow**.
 2. Selecione o **servidor alvo**: `hetzner` ou `oracle`.
-3. Selecione o **serviço para deitar**: `dashboards` (Beszel Hub + Portainer Server), `beszel-hub`, `portainer`, `portainer-agent`, `beszel-agent`, `wireguard`, `netbird`, `netbird-client`, `netbird-proxy`, `caddy`, `cockpit`, `sure`, `coolify`, `supabase`, `monitoring`, `komodo`, `komodo-periphery` ou `prune`.
+3. Selecione o **serviço para deitar**: `dashboards` (Beszel Hub + Portainer Server), `beszel-hub`, `portainer`, `portainer-agent`, `beszel-agent`, `wireguard`, `netbird`, `netbird-client`, `netbird-proxy`, `caddy`, `cockpit`, `sure`, `coolify`, `supabase`, `monitoring`, `postgres`, `komodo`, `komodo-periphery` ou `prune`.
 4. Marque se deseja apagar os volumes de dados persistentes (`remove_volumes`).
 5. Clique em **Run workflow**.
 

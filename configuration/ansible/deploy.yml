@@ -20,6 +20,7 @@
     # Element keeps its own domain on any server (the hetzner inventory's `domain` is acerola.app).
     element_domain: "vinicius-gpl.com"
     monitoring_path: "/opt/monitoring"
+    postgres_path: "/opt/postgres"
     komodo_path: "/opt/komodo"
     komodo_periphery_path: "/opt/komodo-periphery"
     komodo_version: "2.3.3"
@@ -132,6 +133,12 @@
       include_tasks: "{{ apps_dir }}/monitoring/ansible/deploy.yml"
       when: (monitoring_enabled is defined and monitoring_enabled | bool) or ('monitoring' in ansible_run_tags) or ('grafana' in ansible_run_tags) or ('prometheus' in ansible_run_tags)
       tags: [monitoring, grafana, prometheus]
+
+    # The container is a Komodo Deployment (apps/postgres); this step prepares what it mounts.
+    - name: "[postgres] Preparar o Postgres dos apps (scripts, backup)"
+      include_tasks: "{{ apps_dir }}/postgres/ansible/deploy.yml"
+      when: (postgres_enabled | default(false) | bool) or ('postgres' in ansible_run_tags)
+      tags: [postgres]
 
     - name: "[komodo] Deploy Komodo Core (painel)"
       include_tasks: "{{ apps_dir }}/komodo/ansible/deploy.core.yml"

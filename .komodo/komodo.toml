@@ -6,7 +6,7 @@
 #   Builder     one per server. EVERY APP BUILDS ON THE SERVER IT RUNS ON: oracle builds the oracle
 #               apps, hetzner builds the hetzner apps. NO REGISTRY: no GHCR, no push, no pull.
 #               Images stay local (<app>:<commit>) and stacks deploy them with --resolve-image never.
-#   Apps        config's own apps (NetBird and Element Deployments) live in each app's
+#   Apps        config's own apps (NetBird, Element and Postgres Deployments) live in each app's
 #               .komodo/komodo.toml. Ansible renders the configs and secrets they mount
 #               from /opt/<app>; Komodo runs the containers.
 #
@@ -49,6 +49,17 @@ git_provider = "github.com"
 repo = "vinicius-gpl/config"
 branch = "main"
 resource_path = ["configuration/apps/element/.komodo/komodo.toml"]
+delete = false
+
+[[resource_sync]]
+name = "postgres"
+description = "Aplica o Deployment do Postgres dos apps no hetzner"
+tags = ["env:hetzner", "app:postgres"]
+[resource_sync.config]
+git_provider = "github.com"
+repo = "vinicius-gpl/config"
+branch = "main"
+resource_path = ["configuration/apps/postgres/.komodo/komodo.toml"]
 delete = false
 
 # ── Swarms ──────────────────────────────────────────────────────────────────────────────────

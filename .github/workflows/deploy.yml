@@ -37,6 +37,7 @@ on:
           - element-call
           - element-web
           - monitoring
+          - postgres
           - komodo
           - komodo-periphery
       dry_run:
