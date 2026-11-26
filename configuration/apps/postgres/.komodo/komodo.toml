@@ -21,13 +21,15 @@ deploy = true
 [deployment.config]
 server = "hetzner"
 image.type = "Image"
-image.params.image = "postgres:17.12-alpine"
+image.params.image = "postgres:19.0-alpine"
 network = "edge"
 restart = "unless-stopped"
 # Small server shared with everything else: modest buffers and connections.
 command = "-c shared_buffers=64MB -c max_connections=40"
+# From the 18 image on, the volume mounts /var/lib/postgresql (the data lands in <major>/docker
+# inside it), not /var/lib/postgresql/data. A new major needs pg_dumpall + a new volume.
 volumes = """
-postgres-data:/var/lib/postgresql/data
+postgres-data:/var/lib/postgresql
 /opt/postgres/init:/docker-entrypoint-initdb.d:ro
 """
 environment = """
