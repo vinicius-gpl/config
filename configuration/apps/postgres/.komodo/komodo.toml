@@ -1,0 +1,37 @@
+# Komodo resources of postgres (config). Applied by the "postgres" Resource Sync declared in
+# .komodo/komodo.toml at the repo root. Tags: env:hetzner and app:postgres.
+#
+# One Postgres for the apps of the hetzner server, on the `edge` network (the same one the app
+# stacks and Caddy use) and with no published port: an app reaches it as postgres:5432. Each app
+# has its own database and user, created by /opt/postgres/init/10-apps.sh (copied by the Ansible
+# step `postgres`) from the PGAPP_<APP>_PASSWORD variables below: PGAPP_ACEROLA_SYNC_PASSWORD
+# gives the user and database `acerola_sync`.
+#
+# To add an app: a secret Komodo Variable <APP>_DB_PASSWORD, one PGAPP_ line below, redeploy this
+# Deployment and run the Ansible step `postgres` again (the entrypoint only runs the init scripts
+# by itself on the first boot; the step runs the script on a running container, idempotently).
+#
+# Data in the postgres-data volume; daily pg_dumpall in /opt/postgres/backups (cron from Ansible).
+
+[[deployment]]
+name = "postgres"
+description = "Postgres dos apps do hetzner (um banco e um usuário por app)"
+tags = ["env:hetzner", "app:postgres"]
+deploy = true
+[deployment.config]
+server = "hetzner"
+image.type = "Image"
+image.params.image = "postgres:17.12-alpine"
+network = "edge"
+restart = "unless-stopped"
+# Small server shared with everything else: modest buffers and connections.
+command = "-c shared_buffers=64MB -c max_connections=40"
+volumes = """
+postgres-data:/var/lib/postgresql/data
+/opt/postgres/init:/docker-entrypoint-initdb.d:ro
+"""
+environment = """
+POSTGRES_PASSWORD=[[POSTGRES_PASSWORD]]
+PGAPP_ACEROLA_SYNC_PASSWORD=[[ACEROLA_SYNC_DB_PASSWORD]]
+"""
+extra_args = ["--memory=256m", "--shm-size=64m", "--health-cmd=pg_isready", "--health-interval=30s", "--log-opt=max-size=50m", "--log-opt=max-file=2"]

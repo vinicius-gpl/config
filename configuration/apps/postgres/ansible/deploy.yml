@@ -1,0 +1,46 @@
+---
+# =========================================================================
+# === POSTGRES (shared database of the server's apps) ===
+# =========================================================================
+# The container is the Komodo Deployment `postgres` (apps/postgres/.komodo/komodo.toml); Ansible
+# only prepares what it mounts (/opt/postgres/init), the daily backup and, when the container is
+# already up, creates the database and user of any app added since.
+
+- name: "[postgres] Criar diretórios do Postgres"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ postgres_path | default('/opt/postgres') }}"
+    - "{{ postgres_path | default('/opt/postgres') }}/init"
+    - "{{ postgres_path | default('/opt/postgres') }}/backups"
+  tags: [postgres]
+
+- name: "[postgres] Copiar o script que cria banco e usuário por app"
+  copy:
+    src: "{{ apps_dir }}/postgres/config/init-apps.sh"
+    dest: "{{ postgres_path | default('/opt/postgres') }}/init/10-apps.sh"
+    mode: '0755'
+  tags: [postgres]
+
+- name: "[postgres] Backup diário de todos os bancos (pg_dumpall, 14 dias)"
+  copy:
+    dest: /etc/cron.d/postgres-backup
+    mode: '0644'
+    content: |
+      # Daily dump of every database of the postgres container (config, apps/postgres).
+      SHELL=/bin/sh
+      PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      15 4 * * * root docker exec postgres pg_dumpall -U postgres --clean --if-exists | gzip > {{ postgres_path | default('/opt/postgres') }}/backups/$(date +\%F).sql.gz && find {{ postgres_path | default('/opt/postgres') }}/backups -name '*.sql.gz' -mtime +14 -delete
+  tags: [postgres]
+
+- name: "[postgres] Criar banco e usuário dos apps novos (se o Komodo já subiu o container)"
+  command: docker exec postgres sh /docker-entrypoint-initdb.d/10-apps.sh
+  register: postgres_init
+  changed_when: false
+  failed_when:
+    - postgres_init.rc != 0
+    - '"No such container" not in postgres_init.stderr'
+  when: not ansible_check_mode
+  tags: [postgres]

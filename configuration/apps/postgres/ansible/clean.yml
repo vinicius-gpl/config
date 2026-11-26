@@ -1,0 +1,28 @@
+---
+# =========================================================================
+# === POSTGRES CLEAN / TEARDOWN ===
+# =========================================================================
+
+- name: "[postgres] Parar e remover o container do Postgres"
+  command: docker rm -f postgres
+  failed_when: false
+  tags: [postgres]
+
+- name: "[postgres] Remover o backup diário"
+  file:
+    path: /etc/cron.d/postgres-backup
+    state: absent
+  tags: [postgres]
+
+- name: "[postgres] Remover o diretório do Postgres (scripts e backups)"
+  file:
+    path: "{{ postgres_path | default('/opt/postgres') }}"
+    state: absent
+  when: remove_volumes | default(false) | bool
+  tags: [postgres]
+
+- name: "[postgres] Remover o volume de dados do Postgres"
+  command: docker volume rm postgres-data
+  failed_when: false
+  when: remove_volumes | default(false) | bool
+  tags: [postgres]

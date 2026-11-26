@@ -6,3 +6,6 @@ swarm_enabled: true
 
 # Komodo agent name in the panel (the `swarm`/`server` of the stacks).
 komodo_server_name: hetzner
+
+# Postgres of the apps (apps/postgres): the `all` step also prepares it.
+postgres_enabled: true

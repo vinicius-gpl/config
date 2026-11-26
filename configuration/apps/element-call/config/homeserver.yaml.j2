@@ -1,8 +1,8 @@
 # =============================================================================
 #  Synapse Homeserver (dedicado ao Element Call / MatrixRTC)
 # =============================================================================
-server_name: "call.{{ domain }}"
-public_baseurl: "https://call.{{ domain }}/"
+server_name: "call.{{ element_domain }}"
+public_baseurl: "https://call.{{ element_domain }}/"
 
 pid_file: /data/homeserver.pid
 media_store_path: /data/media_store
@@ -82,7 +82,7 @@ rc_registration:
 matrix_rtc:
   transports:
     - type: livekit
-      livekit_service_url: "https://call.{{ domain }}/livekit/jwt"
+      livekit_service_url: "https://call.{{ element_domain }}/livekit/jwt"
 
 trusted_key_servers: []
 suppress_key_server_warning: true
